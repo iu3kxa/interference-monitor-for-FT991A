@@ -1,6 +1,6 @@
 # interference-monitor
 
-Sorry for the native language on hte code; i will translate to english on the way.
+Sorry for the native language on tte code; i will translate to english on the way.
 This project is in an early development status, and i'm relatively new in programming.
 
 This circuit prevent generation or radio interferences to a nearby air traffic control center.
