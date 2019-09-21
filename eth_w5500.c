@@ -74,10 +74,10 @@ static u16 dummybyte[1]={0x0};
 // Network Configuration //
 ///////////////////////////
 wiz_NetInfo gWIZNETINFO = { .mac = {0x02, 0x00, 0x01,0x02, 0x03, 0x04},
-                            .ip = {10, 0, 0, 169},
+                            .ip = {1, 1, 1, 104},
                             .sn = {255,255,255,252},
-                            .gw = {10, 0, 0, 69},
-                            .dns = {0,0,0,0},
+                            .gw = {1, 1, 1, 254},
+                            .dns = {1,1,1,254},
                             .dhcp = NETINFO_STATIC };
 
 /////////////////////

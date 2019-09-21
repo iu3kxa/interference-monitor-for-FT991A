@@ -32,14 +32,13 @@ void Spi2DmaInit(void)
 }
 
 
-
-
 void dmaReceive8(u8 *data, u32 n)
 {
-	USART_DMACmd(USART1, USART_DMAReq_Rx, DISABLE);	
-	SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, ENABLE);
-	
 	DMA_Cmd(DMA1_Channel4, DISABLE);
+	
+	USART_DMACmd(USART1, USART_DMAReq_Rx, DISABLE);			//dma sharet with usart1
+	SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, ENABLE);
+
 	dmaStructure.DMA_MemoryBaseAddr = (u32) data;
 	dmaStructure.DMA_BufferSize     = n;
 
@@ -55,10 +54,12 @@ void dmaReceive8(u8 *data, u32 n)
 
 void dmaSend8(u8 *data, u32 n)
 {
-	USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);	
+	DMA_Cmd(DMA1_Channel5, DISABLE);
+	
+	USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);				//dma shared with usart1
 	SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Tx, ENABLE);
 	
-	DMA_Cmd(DMA1_Channel5, DISABLE);
+	
 	DMA_StructInit(&dmaStructure);
 	dmaStructure.DMA_PeripheralBaseAddr = (u32) &(SPI2->DR);
 	dmaStructure.DMA_Priority           = DMA_Priority_Medium;
@@ -78,10 +79,11 @@ void dmaSend8(u8 *data, u32 n)
 
 void dmaSendCircular8(u16 *data, u32 n)
 {
-	USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);	
+	DMA_Cmd(DMA1_Channel5, DISABLE);
+	
+	USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);				//dma shared with usart1
 	SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Tx, ENABLE);
 	
-	DMA_Cmd(DMA1_Channel5, DISABLE);
 	DMA_StructInit(&dmaStructure);
 	dmaStructure.DMA_PeripheralBaseAddr = (u32) &(SPI2->DR);
 	dmaStructure.DMA_Priority           = DMA_Priority_Medium;
@@ -101,10 +103,11 @@ void dmaSendCircular8(u16 *data, u32 n)
 
 void dmaSendCircular16(u16 *data, u32 n)
 {
-	USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);	
+	DMA_Cmd(DMA1_Channel5, DISABLE);
+	
+	USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);					//dma shared with usart1
 	SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Tx, ENABLE);
 	
-	DMA_Cmd(DMA1_Channel5, DISABLE);
 	DMA_StructInit(&dmaStructure);
 	dmaStructure.DMA_PeripheralBaseAddr = (u32) &(SPI2->DR);
 	dmaStructure.DMA_Priority           = DMA_Priority_Medium;
@@ -124,10 +127,11 @@ void dmaSendCircular16(u16 *data, u32 n)
 
 void dmaSend16(u16 *data, u32 n)
 {
-	USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);	
+	DMA_Cmd(DMA1_Channel5, DISABLE);
+
+	USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);						//dma shared with usart1
 	SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Tx, ENABLE);
 
-	DMA_Cmd(DMA1_Channel5, DISABLE);
 	DMA_StructInit(&dmaStructure);
 	dmaStructure.DMA_PeripheralBaseAddr = (u32) &(SPI2->DR);
 	dmaStructure.DMA_Priority           = DMA_Priority_Medium;

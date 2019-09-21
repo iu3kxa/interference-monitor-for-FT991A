@@ -4,7 +4,7 @@
 #include "stm32f10x_gpio.h"
 #include "touch.h"
 #include "i2c.h"
-#include "enav.h"
+#include "artcc.h"
 #include "hw_config.h"
 #include "lcd_commands.h"
 

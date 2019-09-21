@@ -1,7 +1,9 @@
 #define I2C_TIMEOUT_MAX 		100000		// 1000 per 50khz, 100 per 400khz
 #define MEM_DEVICE_WRITE_ADDR 0xA0
 #define MEM_DEVICE_READ_ADDR	0xA1
-#define I2C_SPEED					100000 	// 400 KHz
+//#define I2C_SPEED					100000 	// 100 KHz	saltuariamente non va
+//#define I2C_SPEED					200000 	// 200 KHz
+#define I2C_SPEED					50000 	// 50 KHz
 
 
 #include "i2c.h"
@@ -126,9 +128,24 @@ u8 eeprom_read(u16 Addr)
 	return Data;
 }
 
+
 u8 eeprom_multiread(u16 Addr,u8 *data, u16 Count)
 {
-	u8 upper_addr,lower_addr;
+	u16 i;
+	
+	u8 *Data=data;
+	
+	for(i=0;i<Count;i++)
+		Data[i] = eeprom_read(Addr+i);
+	return 0;
+}
+
+
+
+/*
+u8 eeprom_multiread(u16 Addr,u8 *data, u16 Count)
+{
+	u8 upper_addr,lower_addr,d;
 	u16 i;
 	
 	u8 *Data=data;
@@ -166,7 +183,8 @@ u8 eeprom_multiread(u16 Addr,u8 *data, u16 Count)
 	
 	for(i=0;i<Count;i++)
 	{
-		Data[i] = I2C_ReceiveData(I2C1);	
+		d=I2C_ReceiveData(I2C1);	
+		Data[i] = i;
 		I2C_AcknowledgeConfig(I2C1, ENABLE);  
 		if(wait_for_i2c(I2C_EVENT_MASTER_BYTE_RECEIVED)) return 17+i;
 	}
@@ -178,6 +196,7 @@ u8 eeprom_multiread(u16 Addr,u8 *data, u16 Count)
 
 	return 0;
 }
+*/
 
 
 void eeprom_cleanup(void)

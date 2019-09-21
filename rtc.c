@@ -10,7 +10,7 @@
 #include "rtc.h"
 #include "touch.h"
 #include "lcd_core.h"
-#include "enav.h"
+#include "artcc.h"
 #include "i2c.h"
 
 //variabili
@@ -54,6 +54,7 @@ u8 RTC_init(void)
 	//Se valore eeprom invalido
 	if(eeprom_read(EE_RTC_SKEW) != 0x55 || eeprom_read(EE_RTC_SKEW+1) != 0xAA)
 	{
+		LCD_writeString((u8 *) " Skew invalido su eeprom, setto default.");
 		eeprom_write(EE_RTC_SKEW,0x55);
 		eeprom_write(EE_RTC_SKEW+1,0xAA);
 		eeprom_write(EE_RTC_SKEW+2,RTC_DEFAULT_CALIBRATION);
@@ -482,32 +483,29 @@ void rtc_adjust(void)
 	while(pos.spot_X3_Y2 != 6)
 	{
 		u8 changed;
-		delay_ms(10);
+		delay_ms(100);
 		
 		//aggiorna calendario su schermo
-		if(s_TimeStructVar.SecLow != s_TimeStructVar.SecLowOld || changed)
-		{
-			LCD_DrawDate(15,72,3);
-			LCD_DrawDate(0,310,1);
-			log_udp();
-			LCD_setCursor(345,258);
-			LCD_setTextSize(2);
-			LCD_setCursor(362,77);
-			LCD_writeString((u8*) "SKEW");
-			LCD_setCursor(420 ,72);
-			LCD_setTextSize(3);
-			buf[0]=(s_TimeStructVar.skew / 100) + 0x30;
-			buf[1]=(s_TimeStructVar.skew / 10) + 0x30;
-			buf[2]=(s_TimeStructVar.skew % 10) + 0x30;
-			buf[3]=0;
-			LCD_writeString(buf);
-			changed=0;
-		}
+		LCD_DrawDate(15,72,3);
+		LCD_DrawDate(0,310,1);
+		LCD_setCursor(345,258);
+		LCD_setTextSize(2);
+		LCD_setCursor(362,77);
+		LCD_writeString((u8*) "SKEW");
+		LCD_setCursor(420 ,72);
+		LCD_setTextSize(3);
+		buf[0]=(s_TimeStructVar.skew / 100) + 0x30;
+		buf[1]=(s_TimeStructVar.skew / 10) + 0x30;
+		buf[2]=(s_TimeStructVar.skew % 10) + 0x30;
+		buf[3]=0;
+		LCD_writeString(buf);
+		changed=0;
 		
 		//legge spot premuto ed aggiusta calendario
 		touch_sample();
 		if (pos.touch_pressed)
 		{
+			LCD_DrawDate(15,72,3);
 			switch(pos.spot_X8_Y6)
 			{
 				//+
@@ -579,12 +577,9 @@ void rtc_adjust(void)
 					}
 					changed=1;
 				break;
-																						
-					
 				default:
 				;
 			}						//fine switch
-			delay_ms(500);
 		}							//fine pos.touch
 	}								//se EXIT premuto esce dal loop e termina
 	LCD_fillScreen(BLACK);

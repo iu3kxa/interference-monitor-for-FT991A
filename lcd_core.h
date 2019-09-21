@@ -84,8 +84,10 @@ void LCD_putPixelCont(u16 x, u16 y, u16 color);
 
 void LCD_drawChar(u16 x0, u16 y0, unsigned char c, u16 color, u16 bg, uint8_t size);
 void LCD_write(unsigned char c);
+void LCD_print(u16 x, u16 y, unsigned char *s,u16 tcolor,u16 bcolor,u8 size);
 void LCD_DrawDate(u32 x,u32 y,u8 size);
-void lcd_Debug(u8 *data,u8 len);
+void lcd_pcDebug(u8 *data,u8 len);
+void lcd_rtxDebug(u8 *data,u8 len);
 void Lcd_CS_Reset(void);
 
 void Lcd_CS_Reset(void);

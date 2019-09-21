@@ -413,9 +413,14 @@
               <FilePath>.\main.c</FilePath>
             </File>
             <File>
-              <FileName>enav.c</FileName>
+              <FileName>artcc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\enav.c</FilePath>
+              <FilePath>.\artcc.c</FilePath>
+            </File>
+            <File>
+              <FileName>dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\dma.c</FilePath>
             </File>
             <File>
               <FileName>eth_socket.c</FileName>
@@ -443,9 +448,19 @@
               <FilePath>.\i2c.c</FilePath>
             </File>
             <File>
+              <FileName>misc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\misc.c</FilePath>
+            </File>
+            <File>
               <FileName>rtc.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\rtc.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\rtx.c</FilePath>
             </File>
             <File>
               <FileName>touch.c</FileName>
@@ -456,16 +471,6 @@
               <FileName>usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\usart.c</FilePath>
-            </File>
-            <File>
-              <FileName>misc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\misc.c</FilePath>
-            </File>
-            <File>
-              <FileName>dma.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\dma.c</FilePath>
             </File>
             <File>
               <FileName>startup_stm32f10x_md.s</FileName>
@@ -538,19 +543,39 @@
           <GroupName>includes</GroupName>
           <Files>
             <File>
+              <FileName>main.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\main.h</FilePath>
+            </File>
+            <File>
+              <FileName>artcc.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\artcc.h</FilePath>
+            </File>
+            <File>
               <FileName>dma.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\dma.h</FilePath>
             </File>
             <File>
-              <FileName>encoder.h</FileName>
+              <FileName>eth_socket.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\encoder.h</FilePath>
+              <FilePath>.\eth_socket.h</FilePath>
             </File>
             <File>
-              <FileName>fps_counter.h</FileName>
+              <FileName>eth_w5500.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\fps_counter.h</FilePath>
+              <FilePath>.\eth_w5500.h</FilePath>
+            </File>
+            <File>
+              <FileName>eth_wizchip_conf.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\eth_wizchip_conf.h</FilePath>
+            </File>
+            <File>
+              <FileName>i2c.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\i2c.h</FilePath>
             </File>
             <File>
               <FileName>usart.h</FileName>
@@ -558,9 +583,24 @@
               <FilePath>.\usart.h</FilePath>
             </File>
             <File>
-              <FileName>main.h</FileName>
+              <FileName>hw_config.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\main.h</FilePath>
+              <FilePath>.\hw_config.h</FilePath>
+            </File>
+            <File>
+              <FileName>lcd_core.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\lcd_core.h</FilePath>
+            </File>
+            <File>
+              <FileName>lcd_glcdfont.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\lcd_glcdfont.h</FilePath>
+            </File>
+            <File>
+              <FileName>lcd_commands.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\lcd_commands.h</FilePath>
             </File>
             <File>
               <FileName>misc.h</FileName>
@@ -568,9 +608,19 @@
               <FilePath>.\misc.h</FilePath>
             </File>
             <File>
+              <FileName>touch.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\touch.h</FilePath>
+            </File>
+            <File>
               <FileName>stm32f10x.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\stm32f10x.h</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_bkp.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\stm32f10x_bkp.h</FilePath>
             </File>
             <File>
               <FileName>stm32f10x_dma.h</FileName>
@@ -578,9 +628,19 @@
               <FilePath>.\stm32f10x_dma.h</FilePath>
             </File>
             <File>
+              <FileName>stm32f10x_exti.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\stm32f10x_exti.h</FilePath>
+            </File>
+            <File>
               <FileName>stm32f10x_gpio.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\stm32f10x_gpio.h</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_i2c.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\stm32f10x_i2c.h</FilePath>
             </File>
             <File>
               <FileName>stm32f10x_rcc.h</FileName>
@@ -603,86 +663,6 @@
               <FilePath>.\stm32f10x_usart.h</FilePath>
             </File>
             <File>
-              <FileName>system_stm32f10x.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\system_stm32f10x.h</FilePath>
-            </File>
-            <File>
-              <FileName>i2c.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\i2c.h</FilePath>
-            </File>
-            <File>
-              <FileName>lcd_commands.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\lcd_commands.h</FilePath>
-            </File>
-            <File>
-              <FileName>lcd_core.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\lcd_core.h</FilePath>
-            </File>
-            <File>
-              <FileName>lcd_glcdfont.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\lcd_glcdfont.h</FilePath>
-            </File>
-            <File>
-              <FileName>pins.txt</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\pins.txt</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f10x_i2c.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\stm32f10x_i2c.h</FilePath>
-            </File>
-            <File>
-              <FileName>hw_config.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\hw_config.h</FilePath>
-            </File>
-            <File>
-              <FileName>touch.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\touch.h</FilePath>
-            </File>
-            <File>
-              <FileName>enav.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\enav.h</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f10x_exti.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\stm32f10x_exti.h</FilePath>
-            </File>
-            <File>
-              <FileName>eth_socket.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\eth_socket.h</FilePath>
-            </File>
-            <File>
-              <FileName>eth_w5500.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\eth_w5500.h</FilePath>
-            </File>
-            <File>
-              <FileName>eth_wizchip_conf.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\eth_wizchip_conf.h</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f10x_bkp.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\stm32f10x_bkp.h</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_rtc.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\stm32f4xx_rtc.h</FilePath>
-            </File>
-            <File>
               <FileName>stm32f10x_pwr.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\stm32f10x_pwr.h</FilePath>
@@ -691,6 +671,11 @@
               <FileName>stm32f10x_rtc.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\stm32f10x_rtc.h</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f10x.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\system_stm32f10x.h</FilePath>
             </File>
           </Files>
         </Group>

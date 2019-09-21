@@ -65,10 +65,8 @@ static void LCD_pinsInit()
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);	//enable clock spi2
 	RCC_APB2PeriphClockCmd(RCC_APB2ENR_AFIOEN, ENABLE);	//enable clock alternate funcion
 
-
 	// GPIO speed by default
 	gpioStructure.GPIO_Speed = GPIO_Speed_50MHz;
-
 		
 	// GPIO for CS/DC/LED/RESET
 	gpioStructure.GPIO_Pin  = RESET_PIN | LCD_DC_PIN | LCD_LED_PIN | TOUCH_CS_PIN;
@@ -90,8 +88,7 @@ static void LCD_pinsInit()
 	gpioStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(GPIOB, &gpioStructure);
 	delay_ms(1);
-	
-	
+		
 	//GPIO_PinRemapConfig(GPIO_Remap_SPI1,ENABLE);
 
 	SPI_I2S_DeInit(SPI2);
@@ -355,6 +352,16 @@ void LCD_write(unsigned char c)
         LCD_drawChar(cursorX, cursorY, c, textColor, textBgColor, textSize);
         cursorX += textSize * 6;
     }
+}
+
+void LCD_print(u16 x, u16 y, unsigned char *s,u16 tcolor,u16 bcolor,u8 size)
+{
+	cursorX = x;
+	cursorY = y;
+	textColor = tcolor;
+	textBgColor=bcolor;
+	textSize=size;
+	while (*(s)) LCD_write(*s++);
 }
 
 void LCD_writeString(unsigned char *s) {
@@ -736,10 +743,6 @@ void Lcd_CS_Reset(void)
 void LCD_DrawDate(u32 x,u32 y,u8 size)
 {
 	u8 buf[16];
-	LCD_setTextSize(size);
-	LCD_setCursor(x,y);
-	LCD_setTextColor(WHITE);
-	LCD_setTextBgColor(BLACK);
 
 	s_DateStructVar.Year=(BKP_ReadBackupRegister(BKP_DR4));
 	s_DateStructVar.Month=(BKP_ReadBackupRegister(BKP_DR2));
@@ -761,9 +764,7 @@ void LCD_DrawDate(u32 x,u32 y,u8 size)
 		buf[2]='-';
 		buf[3]=0;
 	}
-	
-	LCD_writeString(buf);																		//anno
-
+	LCD_print(x,y,buf,WHITE,BLACK,size);	//anno
 	LCD_writeString(MonthsNames[s_DateStructVar.Month-1]);		//mese
 
 	buf[0]='-';
@@ -787,6 +788,7 @@ void LCD_DrawDate(u32 x,u32 y,u8 size)
 		buf[9]='U';
 		buf[10]='T';
 		buf[11]='C';
+		buf[12]=' ';
 		buf[13]=' ';
 		buf[14]=' ';
 		buf[15]=0;
@@ -797,3 +799,17 @@ void LCD_DrawDate(u32 x,u32 y,u8 size)
 	LCD_writeString(buf);																		//orario
 	s_TimeStructVar.SecLowOld=s_TimeStructVar.SecLow;			//schermo aggiornato
 }
+
+//samples
+//LCD_fillRect(0, 30, pos.y>>2, 24, PURPLE);					//draw y bar
+//LCD_fillRect(pos.y>>2, 30, 480-(pos.y>>2), 24, BLACK);	//delete excess
+//for(i = 5; i<480; i+=30)
+//	LCD_drawLine( i, 5, i, 315, LGRAY);
+//for(i = 5; i<315; i+=30)
+//	LCD_drawLine( 5, i, 480, i, LGRAY);
+//for(i = 0; i < 480; i++) // count point
+//{
+	//LCD_fillCircle(i, sin(i), 2, GREEN);
+	//LCD_fillCircle(i, (100*i/180)+120, 2, RED);
+	//LCD_fillCircle(i, 80*sin(30*0.2*M_PI*i/180)+120, 2, BLUE);
+//}

@@ -223,12 +223,12 @@ void RTC_WaitForLastTask(void)
   */
 void RTC_WaitForSynchro(void)
 {
+	u32 i=0;
   /* Clear RSF flag */
   RTC->CRL &= (uint16_t)~RTC_FLAG_RSF;
   /* Loop until RSF flag is set */
-  while ((RTC->CRL & RTC_FLAG_RSF) == (uint16_t)RESET)
-  {
-  }
+  while ( (RTC->CRL & RTC_FLAG_RSF) == (uint16_t)RESET && i<100000)
+	i++;	//timeout
 }
 
 /**
