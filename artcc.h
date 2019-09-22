@@ -4,9 +4,6 @@
 #define EE_TOUCH 		0x0003		//10 bytes riservati	
 #define EE_RTC_SKEW 	0x0010		//3 bytes riservati
 
-#define EE_CH_PAGE 11				//prima pagina nella eeprom dedicata alle frequenze
-
-
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>

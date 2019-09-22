@@ -16,7 +16,8 @@ enum _menu_evt {
 	NET_SEND_OPEN,NET_SEND_RUN,
 	REFGEN_OPEN,REFGEN_RUN,
 	GPIO_OPEN,GPIO_RUN,
-	TOUCH_CALIBRATION_OPEN,TOUCH_CALIBRATION_RUN
+	TOUCH_CALIBRATION_OPEN,TOUCH_CALIBRATION_RUN,
+	ERASE_NVRAM_OPEN,ERASE_NVRAM_RUN
 };
  
 #include <math.h>
@@ -231,9 +232,16 @@ int main(void)
 				menu_evt=TOUCH_CALIBRATION_RUN;
 			case TOUCH_CALIBRATION_RUN:
 				menu_back();
-				break;
+			
+			case ERASE_NVRAM_OPEN:				// impostazioni gpio
+				nvram_reset();
+				menu_evt=ERASE_NVRAM_RUN;
+			case ERASE_NVRAM_RUN:
+				menu_back();
+			break;
+			
 			default:
-				break;
+			break;
 		}
 
 		if(rtx.pc_debug_len)	//informazioni di debug vicino all'ora
@@ -375,7 +383,11 @@ void menu_open (void)
 	LCD_fillRect(5, 235, 110, 60, NAVY);
 	LCD_print(28,247,(u8 *) "TOUCH",WHITE,NAVY,2);
 	LCD_print(5,267,(u8 *) "CALIBRATE",WHITE,NAVY,2);
-	//LCD_fillRect(125, 235, 110, 60, NAVY);
+	
+	LCD_fillRect(125, 235, 110, 60, NAVY);
+	LCD_print(148,247,(u8 *) "ERASE",WHITE,NAVY,2);
+	LCD_print(148,267,(u8 *) "NVRAM",WHITE,NAVY,2);
+	
 	//LCD_fillRect(245, 235, 110, 60, NAVY);
 
 	LCD_fillRect(365, 235, 110, 60, RED);
@@ -393,34 +405,36 @@ void menu_run (void)
 		{
 			case 1:
 				menu_evt=NET_OPEN;
-				break;
+			break;
 			case 2:
 				menu_evt=NET_SEND_OPEN;
-				break;
+			break;
 			case 3:
 				menu_evt=SERIAL_OPEN;
-				break;
+			break;
 			case 4:
 				menu_evt=BT_SERIAL_OPEN;
-				break;
-		
+			break;
 			case 5:
 				menu_evt=REFGEN_OPEN;
-				break;
+			break;
 			case 6:
 				menu_evt=GPIO_OPEN;
-				break;
+			break;
 			case 8:
 				menu_evt=CLOCK_OPEN;
-				break;
+			break;
 			case 9:
 				menu_evt=TOUCH_CALIBRATION_OPEN;
-				break;
+			break;
+			case 10:
+				menu_evt=ERASE_NVRAM_OPEN;
+			break;
 			case 12:
 				menu_back();
-				break;
+			break;
 			default:
-				break;
+			break;
 		}
 		while(pos.touch_pressed)
 			touch_sample();

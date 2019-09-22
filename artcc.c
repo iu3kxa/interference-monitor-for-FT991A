@@ -1,7 +1,7 @@
 //Air Traffic Route Control Center interference monitor
 
 #define EEPROM_SIGNATURE_1 0x55
-#define EEPROM_SIGNATURE_2 0xAD
+#define EEPROM_SIGNATURE_2 0xAE
 
 #define EE_CH_PAGE 11				//prima pagina nella eeprom dedicata alle frequenze
 #define CHANNELS 24					//max frequenze da monitorabili
@@ -135,7 +135,7 @@ u8 artcc_init(void)
 	//popola lista
 	for (i=0;i<CHANNELS;i++)
 	{
-		eeprom_multiread((EEPROM_PAGE_SIZE * i) + EE_CH_PAGE,i2cbuf,I2C_BUFSIZE);
+		eeprom_multiread((EEPROM_PAGE_SIZE * i) + EE_CH_PAGE,i2cbuf,sizeof(eeprom));
 		if(eeprom.deviazione == 0)
 			artcc[i].deviazione=DEVIAZIONE_AM_4000;	//se valore mancante imposta +- 4khz
 		else
@@ -230,100 +230,107 @@ void log_udp (u16 time)
 	eth_buf[buf_pos++]=':';
 	eth_buf[buf_pos++]=' ';
 	
-	switch(rtx.mode)
+	if(rtx.txmode == RTX_TX_TXCAT)	//transmission originated for the autotuner.
 	{
-		case RTX_MODE_LSB:
-			eth_buf[buf_pos++]='L';
-			eth_buf[buf_pos++]='S';
-			eth_buf[buf_pos++]='B';
-		break;
-		case RTX_MODE_USB:
+			eth_buf[buf_pos++]='T';
 			eth_buf[buf_pos++]='U';
-			eth_buf[buf_pos++]='S';
-			eth_buf[buf_pos++]='B';
-	break;
-		case RTX_MODE_CW:
-			eth_buf[buf_pos++]='C';
-			eth_buf[buf_pos++]='W';
-	break;
-		case RTX_MODE_FM:
-			eth_buf[buf_pos++]='F';
-			eth_buf[buf_pos++]='M';
-	break;
-		case RTX_MODE_AM:
-			eth_buf[buf_pos++]='A';
-			eth_buf[buf_pos++]='M';
-	break;
-		case RTX_MODE_RTTY_LSB:
-			eth_buf[buf_pos++]='R';
-			eth_buf[buf_pos++]='T';
-			eth_buf[buf_pos++]='T';
-			eth_buf[buf_pos++]='Y';
-			eth_buf[buf_pos++]='-';
-			eth_buf[buf_pos++]='L';
-			eth_buf[buf_pos++]='S';
-			eth_buf[buf_pos++]='B';
-	break;
-		case RTX_MODE_CW_R:
-			eth_buf[buf_pos++]='C';
-			eth_buf[buf_pos++]='W';
-			eth_buf[buf_pos++]='-';
-			eth_buf[buf_pos++]='R';
-	break;
-		case RTX_MODE_DATA_LSB:
-			eth_buf[buf_pos++]='D';
-			eth_buf[buf_pos++]='A';
-			eth_buf[buf_pos++]='T';
-			eth_buf[buf_pos++]='A';
-			eth_buf[buf_pos++]='-';
-			eth_buf[buf_pos++]='L';
-			eth_buf[buf_pos++]='S';
-			eth_buf[buf_pos++]='B';
-	break;
-		case RTX_MODE_RTTY_USB:
-			eth_buf[buf_pos++]='L';
-			eth_buf[buf_pos++]='S';
-			eth_buf[buf_pos++]='B';
-	break;
-		case RTX_MODE_DATA_FM:
-			eth_buf[buf_pos++]='D';
-			eth_buf[buf_pos++]='A';
-			eth_buf[buf_pos++]='T';
-			eth_buf[buf_pos++]='A';
-			eth_buf[buf_pos++]='-';
-			eth_buf[buf_pos++]='A';
-			eth_buf[buf_pos++]='F';
-			eth_buf[buf_pos++]='M';
-	break;
-		case RTX_MODE_FM_N:
-			eth_buf[buf_pos++]='F';
-			eth_buf[buf_pos++]='M';
-			eth_buf[buf_pos++]='-';
 			eth_buf[buf_pos++]='N';
-	break;
-		case RTX_MODE_DATA_USB:
-			eth_buf[buf_pos++]='D';
-			eth_buf[buf_pos++]='A';
-			eth_buf[buf_pos++]='T';
-			eth_buf[buf_pos++]='A';
-			eth_buf[buf_pos++]='-';
-			eth_buf[buf_pos++]='U';
-			eth_buf[buf_pos++]='S';
-			eth_buf[buf_pos++]='B';
-	break;
-		case RTX_MODE_AM_N:
-			eth_buf[buf_pos++]='A';
-			eth_buf[buf_pos++]='M';
-			eth_buf[buf_pos++]='-';
-			eth_buf[buf_pos++]='N';
-	break;
-		case RTX_MODE_C4FM:
-			eth_buf[buf_pos++]='C';
-			eth_buf[buf_pos++]='4';
-			eth_buf[buf_pos++]='F';
-			eth_buf[buf_pos++]='M';
-		break;
+			eth_buf[buf_pos++]='E';
 	}
+	else
+		switch(rtx.mode)
+		{
+			case RTX_MODE_LSB:
+				eth_buf[buf_pos++]='L';
+				eth_buf[buf_pos++]='S';
+				eth_buf[buf_pos++]='B';
+			break;
+			case RTX_MODE_USB:
+				eth_buf[buf_pos++]='U';
+				eth_buf[buf_pos++]='S';
+				eth_buf[buf_pos++]='B';
+		break;
+			case RTX_MODE_CW:
+				eth_buf[buf_pos++]='C';
+				eth_buf[buf_pos++]='W';
+		break;
+			case RTX_MODE_FM:
+				eth_buf[buf_pos++]='F';
+				eth_buf[buf_pos++]='M';
+		break;
+			case RTX_MODE_AM:
+				eth_buf[buf_pos++]='A';
+				eth_buf[buf_pos++]='M';
+		break;
+			case RTX_MODE_RTTY_LSB:
+				eth_buf[buf_pos++]='R';
+				eth_buf[buf_pos++]='T';
+				eth_buf[buf_pos++]='T';
+				eth_buf[buf_pos++]='Y';
+				eth_buf[buf_pos++]='-';
+				eth_buf[buf_pos++]='L';
+				eth_buf[buf_pos++]='S';
+				eth_buf[buf_pos++]='B';
+		break;
+			case RTX_MODE_CW_R:
+				eth_buf[buf_pos++]='C';
+				eth_buf[buf_pos++]='W';
+				eth_buf[buf_pos++]='-';
+				eth_buf[buf_pos++]='R';
+		break;
+			case RTX_MODE_DATA_LSB:
+				eth_buf[buf_pos++]='D';
+				eth_buf[buf_pos++]='A';
+				eth_buf[buf_pos++]='T';
+				eth_buf[buf_pos++]='A';
+				eth_buf[buf_pos++]='-';
+				eth_buf[buf_pos++]='L';
+				eth_buf[buf_pos++]='S';
+				eth_buf[buf_pos++]='B';
+		break;
+			case RTX_MODE_RTTY_USB:
+				eth_buf[buf_pos++]='L';
+				eth_buf[buf_pos++]='S';
+				eth_buf[buf_pos++]='B';
+		break;
+			case RTX_MODE_DATA_FM:
+				eth_buf[buf_pos++]='D';
+				eth_buf[buf_pos++]='A';
+				eth_buf[buf_pos++]='T';
+				eth_buf[buf_pos++]='A';
+				eth_buf[buf_pos++]='-';
+				eth_buf[buf_pos++]='A';
+				eth_buf[buf_pos++]='F';
+				eth_buf[buf_pos++]='M';
+		break;
+			case RTX_MODE_FM_N:
+				eth_buf[buf_pos++]='F';
+				eth_buf[buf_pos++]='M';
+				eth_buf[buf_pos++]='-';
+				eth_buf[buf_pos++]='N';
+		break;
+			case RTX_MODE_DATA_USB:
+				eth_buf[buf_pos++]='F';
+				eth_buf[buf_pos++]='T';
+				eth_buf[buf_pos++]='8';
+				eth_buf[buf_pos++]='/';
+				eth_buf[buf_pos++]='U';
+				eth_buf[buf_pos++]='S';
+				eth_buf[buf_pos++]='B';
+		break;
+			case RTX_MODE_AM_N:
+				eth_buf[buf_pos++]='A';
+				eth_buf[buf_pos++]='M';
+				eth_buf[buf_pos++]='-';
+				eth_buf[buf_pos++]='N';
+		break;
+			case RTX_MODE_C4FM:
+				eth_buf[buf_pos++]='C';
+				eth_buf[buf_pos++]='4';
+				eth_buf[buf_pos++]='F';
+				eth_buf[buf_pos++]='M';
+			break;
+		}
 	
 	eth_buf[buf_pos++]=' ';
 	eth_buf[buf_pos++]='-';

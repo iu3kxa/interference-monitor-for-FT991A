@@ -3,10 +3,12 @@
 #define MEM_DEVICE_READ_ADDR	0xA1
 //#define I2C_SPEED					100000 	// 100 KHz	saltuariamente non va
 //#define I2C_SPEED					200000 	// 200 KHz
-#define I2C_SPEED					50000 	// 50 KHz
+#define I2C_SPEED					400000 	// 400 KHz
+//#define I2C_SPEED					50000 	// 50 KHz
 
 
 #include "i2c.h"
+#include "lcd_core.h"
 #include "main.h"
 #include "stm32f10x_i2c.h"
 #include "stm32f10x_gpio.h"
@@ -34,7 +36,7 @@ void I2C1_init(void)
 	
 	//Configure I2C_EE pins: SCL and SDA
 	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_6 | GPIO_Pin_7;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
@@ -46,10 +48,12 @@ void I2C1_init(void)
 	I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	I2C_InitStructure.I2C_ClockSpeed = I2C_SPEED;
 
-	/* I2C Peripheral Enable */
-	I2C_Cmd(I2C1, ENABLE);
 	/* Apply I2C configuration after enabling it */
 	I2C_Init(I2C1, &I2C_InitStructure);
+	
+	/* I2C Peripheral Enable */
+	I2C_Cmd(I2C1, ENABLE);
+	
 	//I2C_ITConfig(I2C1, I2C_IT_ERR, ENABLE); 	//interrupt
 } 
 
@@ -128,21 +132,7 @@ u8 eeprom_read(u16 Addr)
 	return Data;
 }
 
-
-u8 eeprom_multiread(u16 Addr,u8 *data, u16 Count)
-{
-	u16 i;
-	
-	u8 *Data=data;
-	
-	for(i=0;i<Count;i++)
-		Data[i] = eeprom_read(Addr+i);
-	return 0;
-}
-
-
-
-/*
+//read (Count) bytes from (Addr) to (data)
 u8 eeprom_multiread(u16 Addr,u8 *data, u16 Count)
 {
 	u8 upper_addr,lower_addr,d;
@@ -173,6 +163,7 @@ u8 eeprom_multiread(u16 Addr,u8 *data, u16 Count)
 	I2C_GenerateSTART(I2C1, ENABLE);
 	if(wait_for_i2c(I2C_EVENT_MASTER_MODE_SELECT)) return 0xff;
 	
+	//invia byte controllo
 	I2C_Send7bitAddress(I2C1, MEM_DEVICE_READ_ADDR, I2C_Direction_Receiver);
 	if(wait_for_i2c(I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) return 15;
 	
@@ -196,16 +187,26 @@ u8 eeprom_multiread(u16 Addr,u8 *data, u16 Count)
 
 	return 0;
 }
-*/
 
 
-void eeprom_cleanup(void)
+void nvram_reset(void)
 {
-  u16 adres=0;
-  for(adres=0;adres<EEPROM_TOTAL_ADDR;adres++)
-  {
-    eeprom_write(adres,0xFF);
-  }
+	u16 addr,addr_old=0;
+	u8 buf[8];
+	
+	LCD_fillScreen(BLACK);
+	LCD_print(0,0,(u8 *) "Erasing: ",WHITE,BLACK,1);
+	for(addr=0;addr<EEPROM_TOTAL_ADDR;addr++)
+	{
+		eeprom_write(addr,0x00);
+		if(addr>>8 != addr_old>>8)
+		{
+			LCD_writeString((u8 *) " ");
+			itoa((EEPROM_TOTAL_ADDR) - addr, buf, 10);
+			LCD_writeString(buf);
+		  addr_old=addr;
+		}
+	}
 }
 
 void eeprom_sequential_write(u16 address,u8 *s,u8 size)
