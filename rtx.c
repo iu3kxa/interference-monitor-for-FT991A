@@ -1,6 +1,8 @@
 #include "rtx.h"
 #include "usart.h"
 
+#define RTX_TIMEOUT 10					//non responding tries
+
 struct _rtx_status rtx;
 extern struct _usart_data ser[];
 
@@ -17,6 +19,8 @@ void rtx_poll (void)
 		case 0:
 			usartx_dmaSend8(SERIAL2,(u8 *) "IF;", 3);		//lettura informazioni
 			rtx.poll++;
+			if(rtx.vfo_A_old != rtx.vfo_A)
+				rtx.poll=0;
 		break;
 		case 1:
 			usartx_dmaSend8(SERIAL2,(u8 *) "TX;", 3);		//ltrasmissione in corso
@@ -32,6 +36,16 @@ void rtx_poll (void)
 		break;
 		case 4:
 			rtx.poll++;
+			if (rtx.timeout)
+			{
+				rtx.timeout--;
+				if (!rtx.timeout)									//no repsponse from rtx
+				{
+					rtx.vfo_A=0;									//update display
+					rtx.lcd_update=1;
+				}
+			}
+			usartx_dmaSend8(SERIAL2,(u8 *) "IF;", 3);		//lettura informazioni
 		break;	
 		case 5:
 			usartx_dmaSend8(SERIAL2,(u8 *) "TX;", 3);		//ltrasmissione in corso
@@ -48,6 +62,7 @@ void rtx_ft991a_decode (u8 * message,u8 len)
 {
 	u8 i;
 	rtx.poweron=1;
+	rtx.timeout=RTX_TIMEOUT;
 	
 	//information
 	if(message[0]=='I' && message[1]=='F')
@@ -63,14 +78,19 @@ void rtx_ft991a_decode (u8 * message,u8 len)
 		
 		//modulazione
 		rtx.mode=message[21];
-		blink(10);
 		
 		if(rtx.vfo_A!=rtx.vfo_A_old)
 		{
 			rtx.changed=10;
 			rtx.lcd_update=1;
-			//rtx.vfo_A_old=rtx.vfo_A;
 		}
+		
+		if(rtx.mode != rtx.mode_old)
+		{
+			rtx.changed=10;
+			rtx.lcd_update=1;
+		}
+
 	}
 	
 	//vfo_A
@@ -117,6 +137,7 @@ void rtx_ft991a_decode (u8 * message,u8 len)
 			rtx.power*=10;
 			rtx.power+=message[i]-0x30;
 		}
+		rtx.lcd_update=1;
 		rtx.power=rtx.power>>1;
 	}
 	

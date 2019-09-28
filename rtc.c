@@ -482,7 +482,6 @@ void rtc_adjust(void)
 	//verifica che non sia premuto exit
 	while(pos.spot_X3_Y2 != 6)
 	{
-		u8 changed;
 		delay_ms(100);
 		
 		//aggiorna calendario su schermo
@@ -499,7 +498,6 @@ void rtc_adjust(void)
 		buf[2]=(s_TimeStructVar.skew % 10) + 0x30;
 		buf[3]=0;
 		LCD_writeString(buf);
-		changed=0;
 		
 		//legge spot premuto ed aggiusta calendario
 		touch_sample();
@@ -540,7 +538,6 @@ void rtc_adjust(void)
 						s_TimeStructVar.skew=i+1;
 						eeprom_write(EE_RTC_SKEW+2,i+1);
 					}
-					changed=1;
 				break;
 				
 				//-
@@ -575,7 +572,6 @@ void rtc_adjust(void)
 						s_TimeStructVar.skew=i-1;
 						eeprom_write(EE_RTC_SKEW+2,i-1);
 					}
-					changed=1;
 				break;
 				default:
 				;

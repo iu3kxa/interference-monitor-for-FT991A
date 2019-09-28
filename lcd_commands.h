@@ -1,5 +1,5 @@
-#ifndef TEST2_COMMANDS_H
-#define TEST2_COMMANDS_H
+#ifndef LCD_COMMANDS_H
+#define LCD_COMMANDS_H
 
 //<editor-fold desc="Display commands">
 
@@ -91,27 +91,16 @@
 #define LCD_3GAMMA_EN           0xF2   /* 3 Gamma enable register */
 #define LCD_PRC                 0xF7   /* Pump ratio control register */
 
-//</editor-fold>
-
-//<editor-fold desc="Orientation">
-
 #define ORIENTATION_PORTRAIT 0x0
 #define ORIENTATION_LANDSCAPE 0x60
 #define ORIENTATION_PORTRAIT_MIRROR 0xc0
 #define ORIENTATION_LANDSCAPE_MIRROR 0xE0
 
-//</editor-fold>
-
-#define LCD_TYPE_ILI9341	9341
 #define LCD_TYPE_ILI9488	9488
 
-//<editor-fold desc="Dimensions">
-#define LCD_PIXEL_WIDTH_9341       240
-#define LCD_PIXEL_HEIGHT_9341      320
-#define LCD_PIXEL_WIDTH_9488       320
-#define LCD_PIXEL_HEIGHT_9488      480
-#define LCD_PIXEL_COUNT_9341    LCD_PIXEL_WIDTH_9341 * LCD_PIXEL_HEIGHT_931
-#define LCD_PIXEL_COUNT_9488    LCD_PIXEL_WIDTH_9488 * LCD_PIXEL_HEIGHT_9488
-//</editor-fold>
+#define LCD_PIXEL_WIDTH       320
+#define LCD_PIXEL_HEIGHT      480
+#define LCD_PIXEL_COUNT    LCD_PIXEL_WIDTH * LCD_PIXEL_HEIGHT
 
-#endif //TEST2_COMMANDS_H
+
+#endif

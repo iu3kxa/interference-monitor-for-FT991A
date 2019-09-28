@@ -31,6 +31,27 @@
 #define SPI_HISPEED		SPI_BaudRatePrescaler_2		//18mhz (36 with ahpb1 at 72)
 #define SPI_LOSPEED	 	SPI_BaudRatePrescaler_64	//0.3mhz
 
+#define BLACK24				0x000000
+#define NAVY24            0x000080	/*   0,   0, 128 */
+#define DGREEN24        	0x008000  	/*   0, 128,   0 */
+#define DCYAN24          0x008080      /*   0, 128, 128 */
+#define MAROON24       	0x800000      /* 128,   0,   0 */
+#define PURPLE24         0x800080      /* 128,   0, 128 */
+#define OLIVE24          	0x808000      /* 128, 128,   0 */
+#define LGRAY24				0xc0c0c0      /* 192, 192, 192 */
+#define DGRAY24          0x808080      /* 128, 128, 128 */
+#define BLUE24           	0x0000ff      /*   0,   0, 255 */
+#define GREEN24         	0x00ff00      /*   0, 255,   0 */
+#define CYAN24           	0x00ffff      /*   0, 255, 255 */
+#define RED24             	0xff0000      /* 255,   0,   0 */
+#define MAGENTA24     	0xff00ff      /* 255,   0, 255 */
+#define YELLOW24      	0xffff00      /* 255, 255,   0 */
+#define WHITE24           0xffffff      /* 255, 255, 255 */
+#define ORANGE24         0xffa500   /* 255, 165,   0 */
+#define GREENYELLOW24 0xadff30    0xAFE5      /* 173, 255,  47 */
+//#define BROWN24                 0XBC40 //
+//#define BRRED24                 0XFC07 //
+
 
 #define BLACK           0x0000      /*   0,   0,   0 */
 #define NAVY            0x000F      /*   0,   0, 128 */

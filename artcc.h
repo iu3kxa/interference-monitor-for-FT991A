@@ -18,7 +18,6 @@ struct _artcc_frequencies
 	u16 deviazione;	//rispetto alla portante
 	u8	 attivo;
 	u8  orari;
-	u8  conflitto;
 };
 
 

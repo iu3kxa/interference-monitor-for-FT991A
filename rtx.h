@@ -30,10 +30,9 @@ struct _rtx_status
 	u32 vfo_A_old;
 	u32 vfo_B;
 	u32 vfo_B_old;
-	u16 spettro_rtx_left;
-	u16 spettro_rtx_right;
 	u16 tx_time;
 	u8 mode;
+	u8 mode_old;
 	u8 power;
 	u8 txmode;
 	u8 info;
@@ -42,6 +41,8 @@ struct _rtx_status
 	u8 pc_debugdata[20];
 	u8 rtx_debugdata[20];
 	u8 poll;
+	u8 timeout;
+	bool conflict;
 	bool changed;
 	bool lcd_update;
 	bool poweron;

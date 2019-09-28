@@ -123,6 +123,7 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
    uint8_t spi_data[3];
 
    //WIZCHIP_CRITICAL_ENTER();
+	dmaWait();
 	LAN_CS_RESET;
 
    AddrSel |= (_W5500_SPI_READ_ | _W5500_SPI_VDM_OP_);
@@ -136,7 +137,6 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
    spi_data[2] = (AddrSel & 0x000000FF) >> 0;
 	
 	dmaSend8(spi_data,3);
-	dmaWait();
 	
 	spi_data[0]=SPI2->DR;			//empty buffer
 	dmaReceive8(spi_data,1);		//rearm dma for receiving a single byte
@@ -154,6 +154,7 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
    uint8_t spi_data[4];
 
    //WIZCHIP_CRITICAL_ENTER();
+	dmaWait();
    LAN_CS_RESET;
 
    AddrSel |= (_W5500_SPI_WRITE_ | _W5500_SPI_VDM_OP_);
@@ -180,6 +181,7 @@ void WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    //uint16_t i;
 
    //WIZCHIP_CRITICAL_ENTER();
+	dmaWait();
    LAN_CS_RESET;
 
    AddrSel |= (_W5500_SPI_READ_ | _W5500_SPI_VDM_OP_);
@@ -193,8 +195,8 @@ void WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    spi_data[1] = (AddrSel & 0x0000FF00) >> 8;
    spi_data[2] = (AddrSel & 0x000000FF) >> 0;
 	dmaSend8(spi_data,3);
-	dmaWait();
 	
+	dmaWait();
 	spi_data[0]=SPI2->DR;				//empty buffer
 	dmaReceive8(pBuf,len);				//rearm dma for receiving a single byte
 	dmaSendCircular8(dummybyte,len);	//dummy send to create clock for receive
@@ -204,12 +206,13 @@ void WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    //WIZCHIP_CRITICAL_EXIT();
 }
 
-void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
+void WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
 {
    uint8_t spi_data[3];
    //uint16_t i;
 
    //WIZCHIP_CRITICAL_ENTER();
+	dmaWait();
    LAN_CS_RESET;
 
    AddrSel |= (_W5500_SPI_WRITE_ | _W5500_SPI_VDM_OP_);
@@ -223,11 +226,9 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    spi_data[1] = (AddrSel & 0x0000FF00) >> 8;
    spi_data[2] = (AddrSel & 0x000000FF) >> 0;
 	dmaSend8(spi_data,3);
-	dmaWait();
-	
 	dmaSend8(pBuf,len);
-	dmaWait();
 
+	dmaWait();
    LAN_CS_SET;
    //WIZCHIP_CRITICAL_EXIT();
 }

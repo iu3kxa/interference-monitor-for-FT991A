@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <math.h>
 #include "hw_config.h"
 #include "stm32f10x.h"
 #include "misc.h"

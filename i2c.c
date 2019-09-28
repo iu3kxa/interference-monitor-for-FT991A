@@ -175,7 +175,7 @@ u8 eeprom_multiread(u16 Addr,u8 *data, u16 Count)
 	for(i=0;i<Count;i++)
 	{
 		d=I2C_ReceiveData(I2C1);	
-		Data[i] = i;
+		Data[i] = d;
 		I2C_AcknowledgeConfig(I2C1, ENABLE);  
 		if(wait_for_i2c(I2C_EVENT_MASTER_BYTE_RECEIVED)) return 17+i;
 	}
@@ -188,33 +188,70 @@ u8 eeprom_multiread(u16 Addr,u8 *data, u16 Count)
 	return 0;
 }
 
-
-void nvram_reset(void)
-{
-	u16 addr,addr_old=0;
-	u8 buf[8];
-	
-	LCD_fillScreen(BLACK);
-	LCD_print(0,0,(u8 *) "Erasing: ",WHITE,BLACK,1);
-	for(addr=0;addr<EEPROM_TOTAL_ADDR;addr++)
-	{
-		eeprom_write(addr,0x00);
-		if(addr>>8 != addr_old>>8)
-		{
-			LCD_writeString((u8 *) " ");
-			itoa((EEPROM_TOTAL_ADDR) - addr, buf, 10);
-			LCD_writeString(buf);
-		  addr_old=addr;
-		}
-	}
-}
-
+//sequential write (slow, tested) 
 void eeprom_sequential_write(u16 address,u8 *s,u8 size)
 {
 	u8 count;
 	for (count=0; count < size ; count++)
 		eeprom_write(address++,*s++);
 }
+
+//sequential write (fast, untested)
+u8 eeprom_multiwrite(u16 Addr,u8 *data, u16 Count)
+{
+	u8 upper_addr,lower_addr;
+	u16 i;
+	
+	//Avvio i2c
+	I2C_GenerateSTART(I2C1, ENABLE);
+	if(wait_for_i2c(I2C_EVENT_MASTER_MODE_SELECT)) return 0xff;
+	
+	//comando scrittura
+	I2C_Send7bitAddress(I2C1, MEM_DEVICE_WRITE_ADDR, I2C_Direction_Transmitter);
+	if(wait_for_i2c(I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) return 0xff;
+
+	//indirizzo alto
+	I2C_SendData(I2C1, upper_addr);
+	if(wait_for_i2c(I2C_EVENT_MASTER_BYTE_TRANSMITTED)) return 0xff;
+
+	//indirizzo basso
+	I2C_SendData(I2C1, lower_addr);
+	if(wait_for_i2c(I2C_EVENT_MASTER_BYTE_TRANSMITTED)) return 0xff;
+
+	//invia dato
+	//I2C_SendData(I2C1, Data);
+	//if(wait_for_i2c(I2C_EVENT_MASTER_BYTE_TRANSMITTED)) return 0xff;
+
+	for(i=0;i<Count;i++)	//write until the end of current page
+	{
+		I2C_SendData(I2C1, data[i]);
+		if(wait_for_i2c(I2C_EVENT_MASTER_BYTE_TRANSMITTED)) return 0xff;
+	}
+
+	//commando arresto i2c
+	I2C_GenerateSTOP(I2C1, ENABLE);
+	delay_ms(10);
+	return 0;
+}
+
+void nvram_reset(void)
+{
+	u16 page=0;
+	u8 buf[5],zeroes[EEPROM_PAGE_SIZE];
+	memset (&zeroes, 0, sizeof(zeroes));
+		
+	LCD_fillScreen(BLACK);
+	LCD_print(0,0,(u8 *) "Erasing pages, remaining:",WHITE,BLACK,1);
+	
+	for(page=0;page<EEPROM_TOTAL_PAGES;page++)
+	{
+		eeprom_multiwrite(EEPROM_PAGE_SIZE*page,zeroes,EEPROM_PAGE_SIZE);
+		LCD_writeString((u8 *) " ");
+		itoa(EEPROM_TOTAL_PAGES - page, buf, 10);
+		LCD_writeString(buf);
+	}
+}
+
  
 void eeprom_sequential_read(u16 address,u8 count)
 {

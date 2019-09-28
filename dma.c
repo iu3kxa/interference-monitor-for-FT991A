@@ -34,6 +34,7 @@ void Spi2DmaInit(void)
 
 void dmaReceive8(u8 *data, u32 n)
 {
+	dmaWait();
 	DMA_Cmd(DMA1_Channel4, DISABLE);
 	
 	USART_DMACmd(USART1, USART_DMAReq_Rx, DISABLE);			//dma sharet with usart1
@@ -54,6 +55,7 @@ void dmaReceive8(u8 *data, u32 n)
 
 void dmaSend8(u8 *data, u32 n)
 {
+	dmaWait();
 	DMA_Cmd(DMA1_Channel5, DISABLE);
 	
 	USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);				//dma shared with usart1
@@ -79,6 +81,7 @@ void dmaSend8(u8 *data, u32 n)
 
 void dmaSendCircular8(u16 *data, u32 n)
 {
+	dmaWait();
 	DMA_Cmd(DMA1_Channel5, DISABLE);
 	
 	USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);				//dma shared with usart1
@@ -103,6 +106,7 @@ void dmaSendCircular8(u16 *data, u32 n)
 
 void dmaSendCircular16(u16 *data, u32 n)
 {
+	dmaWait();
 	DMA_Cmd(DMA1_Channel5, DISABLE);
 	
 	USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);					//dma shared with usart1
@@ -127,6 +131,7 @@ void dmaSendCircular16(u16 *data, u32 n)
 
 void dmaSend16(u16 *data, u32 n)
 {
+	dmaWait();
 	DMA_Cmd(DMA1_Channel5, DISABLE);
 
 	USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);						//dma shared with usart1
@@ -151,82 +156,89 @@ void dmaSend16(u16 *data, u32 n)
 
 void dmaSendCmd(u8 cmd)
 {
-    Lcd_CS_Reset();
-    LCD_DC_RESET;
-    dmaSend8(&cmd, 1);
-    dmaWait();
-    LCD_CS_SET;
+	dmaWait();
+	Lcd_CS_Reset();
+	LCD_DC_RESET;
+	dmaSend8(&cmd, 1);
+	dmaWait();
+	LCD_CS_SET;
 }
 
-void dmaSendCmdCont(u8 cmd) {
-    LCD_DC_RESET;
-    dmaSend8(&cmd, 1);
-    dmaWait();
+void dmaSendCmdCont(u8 cmd)
+{
+	LCD_DC_RESET;
+	dmaSend8(&cmd, 1);
 }
 
-void dmaReceiveDataCont8(u8 *data) {
-    u8 dummy = 0xFF;
-    dmaSend8(&dummy, 1);
-    dmaReceive8(data, 1);
-    dmaWait();
+void dmaReceiveDataCont8(u8 *data)
+{
+	u8 dummy = 0xFF;
+	dmaSend8(&dummy, 1);
+	dmaReceive8(data, 1);
 }
 
-void dmaSendData8(u8 *data, u32 n) {
-    Lcd_CS_Reset();
-    LCD_DC_SET;
-    dmaSend8(data, n);
-    dmaWait();
-    LCD_CS_SET;
+void dmaSendData8(u8 *data, u32 n)
+{
+	dmaWait();
+	Lcd_CS_Reset();
+	LCD_DC_SET;
+	dmaSend8(data, n);
+	dmaWait();
+	LCD_CS_SET;
 }
 
-void dmaSendDataCont8(u8 *data, u32 n) {
-    LCD_DC_SET;
-    dmaSend8(data, n);
-    dmaWait();
+void dmaSendDataCont8(u8 *data, u32 n)
+{
+	LCD_DC_SET;
+	dmaSend8(data, n);
 }
 
-void dmaSendData16(u16 *data, u32 n) {
-    Lcd_CS_Reset();
-    LCD_DC_SET;
-    dmaSend16(data, n);
-    dmaWait();
-    LCD_CS_SET;
+void dmaSendData16(u16 *data, u32 n)
+{
+	dmaWait();
+	Lcd_CS_Reset();
+	LCD_DC_SET;
+	dmaSend16(data, n);
+	dmaWait();
+	LCD_CS_SET;
 }
 
-void dmaSendDataCont16(u16 *data, u32 n) {
-    LCD_DC_SET;
-    dmaSend16(data, n);
-    dmaWait();
+void dmaSendDataCont16(u16 *data, u32 n)
+{
+	LCD_DC_SET;
+	dmaSend16(data, n);
 }
 
-void dmaSendDataBuf16(void) {
-    if(dma16BufIndex == 0) return;
-    LCD_DC_SET;
-    dmaSend16(dma16Buffer, dma16BufIndex);
-    dma16BufIndex = 0;
-    dmaWait();
+void dmaSendDataBuf16(void)
+{
+   if(dma16BufIndex == 0) return;
+	LCD_DC_SET;
+   dmaSend16(dma16Buffer, dma16BufIndex);
+   dma16BufIndex = 0;
 }
 
-void dmaSendDataContBuf16(u16 *data, u32 n) {
-    while (n--) {
-        dma16Buffer[dma16BufIndex] = *data++;
-        if (dma16BufIndex == DMA16_BUF_SIZE - 1) {
-            dmaSendDataBuf16();
-        }
-        dma16BufIndex++;
-    }
+void dmaSendDataContBuf16(u16 *data, u32 n)
+{
+	while (n--) {
+		dma16Buffer[dma16BufIndex] = *data++;
+		if (dma16BufIndex == DMA16_BUF_SIZE - 1)
+		{
+			dmaSendDataBuf16();
+		}
+		dma16BufIndex++;
+	}
 }
 
-void dmaSendDataCircular8(u16 *data, u32 n) {
-    LCD_DC_SET;
-    dmaSendCircular16(data, n);
-    dmaWait();
+void dmaSendDataCircular8(u16 *data, u32 n)
+{
+	LCD_DC_SET;
+	dmaSendCircular16(data, n);
 }
 
-void dmaSendDataCircular16(u16 *data, u32 n) {
-    LCD_DC_SET;
-    dmaSendCircular16(data, n);
-    dmaWait();
+void dmaSendDataCircular16(u16 *data, u32 n)
+{
+	LCD_DC_SET;
+	dmaSendCircular16(data, n);
 }
 
 void dmaFill16(u16 color, u32 n)
@@ -247,32 +259,37 @@ void dmaFill16(u16 color, u32 n)
 		dma8Buffer[i++]=r;
 	}
 		
-	
+	dmaWait();
 	Lcd_CS_Reset();
-    dmaSendCmdCont(LCD_GRAM);
-    while (n != 0)
-	 {
+	dmaSendCmdCont(LCD_GRAM);
+	while (n != 0)
+	{
 		ts = (u16) (n > DMA8_BUF_SIZE ? DMA8_BUF_SIZE : n);
 		dmaSendData8(dma8Buffer, ts);
 		n -= ts;
-    }
-    LCD_CS_SET;
+	}
+   dmaWait();
+	LCD_CS_SET;
 }
 
 //"IRQ handlers"
 //spi
-void DMA1_Channel4_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC4) == SET) {
-        DMA_Cmd(DMA1_Channel4, DISABLE);
-        DMA_ClearITPendingBit(DMA1_IT_TC4);
-    }
+void DMA1_Channel4_IRQHandler(void)
+{
+	if (DMA_GetITStatus(DMA1_IT_TC4) == SET)
+	{
+		DMA_Cmd(DMA1_Channel4, DISABLE);
+		DMA_ClearITPendingBit(DMA1_IT_TC4);
+	}
 }
 
-void DMA1_Channel5_IRQHandler(void) {
-    if (DMA_GetITStatus(DMA1_IT_TC5) == SET) {
-        DMA_Cmd(DMA1_Channel5, DISABLE);
-        DMA_ClearITPendingBit(DMA1_IT_TC5);
-    }
+void DMA1_Channel5_IRQHandler(void)
+{
+	if (DMA_GetITStatus(DMA1_IT_TC5) == SET)
+	{
+		DMA_Cmd(DMA1_Channel5, DISABLE);
+		DMA_ClearITPendingBit(DMA1_IT_TC5);
+	}
 }
 
 

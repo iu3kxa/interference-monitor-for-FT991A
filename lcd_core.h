@@ -29,12 +29,12 @@
 #include "dma.h"
 
 #define LCD_setAddressWindowToWrite(x1,y1,x2,y2) \
-    LCD_setAddressWindow(x1, y1, x2, y2); \
-    dmaSendCmd(LCD_GRAM)
+	LCD_setAddressWindow(x1, y1, x2, y2); \
+	dmaSendCmd(LCD_GRAM)
 
 #define LCD_setAddressWindowToRead(x1,y1,x2,y2) \
-    LCD_setAddressWindow(x1, y1, x2, y2); \
-    dmaSendCmd(LCD_RAMRD)
+	LCD_setAddressWindow(x1, y1, x2, y2); \
+	dmaSendCmd(LCD_RAMRD)
 
 u16 LCD_getWidth(void);
 u16 LCD_getHeight(void);
@@ -69,22 +69,22 @@ void TEST_fillPrimitives(u16 step);
 
 void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf);
 
-void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color);
+void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u32 color);
 void LCD_fillScreen(u16 color);
-void LCD_drawRect(u16 x, u16 y, u16 w, u16 h, u16 color);
+void LCD_drawRect(u16 x, u16 y, u16 w, u16 h, u32 color);
 void LCD_drawCircle(u16 x0, u16 y0, u16 r, u16 color);
 void LCD_fillCircle(u16 x0, u16 y0, u16 r, u16 color);
-void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color);
-void LCD_drawFastHLine(u16 x0, u16 y0, u16 w, u16 color);
-void LCD_drawFastVLine(u16 x0, u16 y0, u16 h, u16 color);
-void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color);
-void LCD_putPixel(u16 x, u16 y, u16 color);
-static void LCD_putPixelCont(u16 x, u16 y, u16 color);
-void LCD_putPixelCont(u16 x, u16 y, u16 color);
+void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u32 color);
+void LCD_drawFastHLine(u16 x0, u16 y0, u16 w, u32 color);
+void LCD_drawFastVLine(u16 x0, u16 y0, u16 h, u32 color);
+void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u32 color);
+void LCD_putPixel(u16 x, u16 y, u32 color);
+static void LCD_putPixelCont(u16 x, u16 y, u32 color);
+void LCD_putPixelCont(u16 x, u16 y, u32 color);
 
-void LCD_drawChar(u16 x0, u16 y0, unsigned char c, u16 color, u16 bg, uint8_t size);
+void LCD_drawChar(u16 x0, u16 y0, unsigned char c, u32 color, u16 bg, uint8_t size);
 void LCD_write(unsigned char c);
-void LCD_print(u16 x, u16 y, unsigned char *s,u16 tcolor,u16 bcolor,u8 size);
+void LCD_print(u16 x, u16 y, unsigned char *s,u32 tcolor,u32 bcolor,u8 size);
 void LCD_DrawDate(u32 x,u32 y,u8 size);
 void lcd_pcDebug(u8 *data,u8 len);
 void lcd_rtxDebug(u8 *data,u8 len);

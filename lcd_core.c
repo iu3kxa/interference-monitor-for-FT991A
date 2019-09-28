@@ -25,7 +25,7 @@ extern unsigned char buf[16];
 
 //<editor-fold desc="Init commands">
 
-static const uint8_t init_commands_9488[] =
+static const uint8_t init_commands[] =
 {
 	5, 0xf7, 0xa9, 0x51, 0x2c, 0x82,
 	3, 0xc0, 0x11, 0x09,
@@ -57,8 +57,8 @@ static void LCD_pinsInit()
 	SPI_InitTypeDef  spiStructure;
 	GPIO_InitTypeDef gpioStructure;
 
-	//RCC_PCLK1Config(RCC_HCLK_Div1);			//36 mhz
-	RCC_PCLK1Config(RCC_HCLK_Div1);				//2 mhz lento per debug
+	RCC_PCLK1Config(RCC_HCLK_Div1);			//36 mhz
+	//RCC_PCLK1Config(RCC_HCLK_Div16);			//2 mhz lento per debug
 	RCC_PCLK2Config(RCC_HCLK_Div1);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);	//enable clock gpioa
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);	//enable clock gpiob
@@ -119,16 +119,16 @@ static void LCD_pinsInit()
 
 void LCD_reset()
 {
-    LCD_RST_RESET;
-    delay_ms(100);
-    LCD_RST_SET;
-    delay_ms(200);
+	LCD_RST_RESET;
+	delay_ms(100);
+	LCD_RST_SET;
+	delay_ms(200);
 }
 
 void LCD_exitStandby() {
-    //dmaSendCmd(LCD_SLEEP_OUT);
-    delay_ms(150);
-    dmaSendCmd(LCD_DISPLAY_ON);
+	//dmaSendCmd(LCD_SLEEP_OUT);
+	delay_ms(150);
+	dmaSendCmd(LCD_DISPLAY_ON);
 }
 
 static void LCD_configure(void)
@@ -136,9 +136,11 @@ static void LCD_configure(void)
 	u8 count;
 	u8 *address;
 
-	address = (u8 *) init_commands_9488;
+	address = (u8 *) init_commands;
 
+	dmaWait();
 	Lcd_CS_Reset();
+	delay_ms(5);
 	while (1)
 	{
 		count = *(address++);
@@ -146,11 +148,11 @@ static void LCD_configure(void)
 		dmaSendCmdCont(*(address++));
 		dmaSendDataCont8(address, count);
 		address += count;
+		delay_ms(1);												//same operations need a small pause
 	}
+	dmaWait();
 	LCD_CS_SET;
-	delay_ms(1);
-	//LCD_setOrientation(0);
-	delay_ms(1);
+	delay_ms(5);
 }
 
 void LCD_init()
@@ -159,27 +161,30 @@ void LCD_init()
 	delay_ms(1);
 	Spi2DmaInit();
 	delay_ms(1);
+	
+	dmaWait();
 	LCD_reset();
 	LCD_configure();
 	LCD_exitStandby();
 	
 	delay_ms(50);
+	dmaWait();
 	LCD_LED_SET;
 	delay_ms(1);
-
 }
 
 void LAN_init()
 {
-    //LanDmaInit();
-
-    //LAN_reset();
-    //LAN_exitStandby();
-    //LAN_configure();
+	dmaWait();
+	//LanDmaInit();
+	//LAN_reset();
+	//LAN_exitStandby();
+	//LAN_configure();
 }
 
 void SPI2_SetSpeed(u16 speed)
 {
+	dmaWait();
 	SPI2->CR1 &= ~(1<<6);	//disable spi
 	SPI2->CR1 &= ~(7<<3);
 	
@@ -196,85 +201,87 @@ void SPI2_SetSpeed(u16 speed)
 	SPI2->CR1 |=  1<<6;			//enable spi
 }
 
-//</editor-fold>
-
-//<editor-fold desc="LCD common operations">
-
+//lcd functions
 void LCD_setOrientation(u8 orientation)
 {
 	if (orientation == ORIENTATION_LANDSCAPE || orientation == ORIENTATION_LANDSCAPE_MIRROR)
 	{
-		screen_height = LCD_PIXEL_WIDTH_9488;
-		screen_width  = LCD_PIXEL_HEIGHT_9488;
+		screen_height = LCD_PIXEL_WIDTH;
+		screen_width  = LCD_PIXEL_HEIGHT;
 	}
 	else
 	{
-		screen_height = LCD_PIXEL_HEIGHT_9488;
-		screen_width  = LCD_PIXEL_WIDTH_9488;
-    }
+		screen_height = LCD_PIXEL_HEIGHT;
+		screen_width  = LCD_PIXEL_WIDTH;
+	}
 
-    Lcd_CS_Reset();
-    dmaSendCmdCont(LCD_MAC);
-    dmaSendDataCont8(&orientation, 1);
-    LCD_CS_SET;
+	dmaWait();
+	Lcd_CS_Reset();
+	dmaSendCmdCont(LCD_MAC);
+	dmaSendDataCont8(&orientation, 1);
+	dmaWait();
+   LCD_CS_SET;
 }
 
-void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2) {
-    u16 pointData[2];
+void LCD_setAddressWindow(u16 x1, u16 y1, u16 x2, u16 y2)
+{
+	u16 pointData[2];
 
-    Lcd_CS_Reset();
-    dmaSendCmdCont(LCD_COLUMN_ADDR);
-    pointData[0] = x1;
-    pointData[1] = x2;
-    LCD_setSpi16();
-    dmaSendDataCont16(pointData, 2);
-    LCD_setSpi8();
+	dmaWait();
+	Lcd_CS_Reset();
 
-    dmaSendCmdCont(LCD_PAGE_ADDR);
-    pointData[0] = y1;
-    pointData[1] = y2;
-    LCD_setSpi16();
-    dmaSendDataCont16(pointData, 2);
-    LCD_setSpi8();
-    LCD_CS_SET;
+	dmaSendCmdCont(LCD_COLUMN_ADDR);
+	pointData[0] = x1;
+	pointData[1] = x2;
+	LCD_setSpi16();
+	dmaSendDataCont16(pointData, 2);
+	LCD_setSpi8();
+
+	dmaSendCmdCont(LCD_PAGE_ADDR);
+	pointData[0] = y1;
+	pointData[1] = y2;
+	LCD_setSpi16();
+	dmaSendDataCont16(pointData, 2);
+	dmaWait();
+	LCD_setSpi8();
+	LCD_CS_SET;
 }
 
-u16 LCD_getWidth() {
-    return screen_width;
+u16 LCD_getWidth()
+{
+	return screen_width;
 }
 
-u16 LCD_getHeight() {
-    return screen_height;
+u16 LCD_getHeight()
+{
+	return screen_height;
 }
 
-//</editor-fold>
-
-//<editor-fold desc="SPI functions">
-
+//SPI functions
 void LCD_setSpi8(void)
 {
-    SPI2->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
-    SPI2->CR1 &= ~SPI_CR1_DFF; // SPI 8
-    SPI2->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
+	dmaWait();
+	SPI2->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
+	SPI2->CR1 &= ~SPI_CR1_DFF; // SPI 8
+	SPI2->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
 }
 
 void LCD_setSpi16(void)
 {
-    SPI2->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
-    SPI2->CR1 |= SPI_CR1_DFF;  // SPI 16
-    SPI2->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
+	dmaWait();
+	SPI2->CR1 &= ~SPI_CR1_SPE; // DISABLE SPI
+	SPI2->CR1 |= SPI_CR1_DFF;  // SPI 16
+	SPI2->CR1 |= SPI_CR1_SPE;  // ENABLE SPI
 }
 
-void LCD_drawChar(u16 x0, u16 y0, unsigned char c, u16 color, u16 bg, uint8_t size)
+void LCD_drawChar(u16 x0, u16 y0, unsigned char c, u32 color, u16 bg, uint8_t size)
 {
 	u16 scaledWidth,doubleScaledWidth,doubleSize,count,mx,my,pixelColor,characterNumber;
 	s16 x1,y1,kdebug ;
 	s8  i, j, sx, sy;
    u8  line;
 	
-	
 	#define MAX_PIXELS	0x1ff
-	
 	////u16 charPixels[count];
 	u16 charPixels[MAX_PIXELS];
 	
@@ -288,16 +295,14 @@ void LCD_drawChar(u16 x0, u16 y0, unsigned char c, u16 color, u16 bg, uint8_t si
 	count      = (u16) (48 * doubleSize);
 
 	if (x0 >= LCD_getWidth() || y0 >= LCD_getHeight() || x1 < 0 || y1 < 0) return;
+	if (!_cp437 && (c >= 176)) c++; // Handle 'classic' charset behavior
 
-    if (!_cp437 && (c >= 176)) c++; // Handle 'classic' charset behavior
+	characterNumber = (u16) (c * 5);
 
-    characterNumber = (u16) (c * 5);
+	if (bg == TRANSPARENT_COLOR)
+		LCD_readPixels(x0, y0, x1, y1, charPixels);
 
-    if (bg == TRANSPARENT_COLOR) {
-        LCD_readPixels(x0, y0, x1, y1, charPixels);
-    }
-
-    LCD_setAddressWindowToWrite(x0, y0, x1, y1);
+	LCD_setAddressWindowToWrite(x0, y0, x1, y1);
 
 	for (i = 0; i < 6; i++)
 	{
@@ -329,32 +334,35 @@ void LCD_drawChar(u16 x0, u16 y0, unsigned char c, u16 color, u16 bg, uint8_t si
 		dma8Buffer[y1++]=(u8) ((charPixels[x1]&0x7e0)>>3);	//green
 		dma8Buffer[y1++]=(u8) ((charPixels[x1]&0xf800)>>8);	//red
 	}
-	
+
 	dmaSendData8(dma8Buffer, y1-1);
-	
-	//LCD_setSpi16();
-	//dmaSendData16(charPixels, count);
 	LCD_setSpi8();
 }
 
 void LCD_write(unsigned char c)
 {
-    if (c == '\n') {
-        cursorY += textSize * 8;
-        cursorX = 0;
-    } else if (c == '\r') {
-        cursorX = 0;
-    } else {
-        if (wrap && ((cursorX + textSize * 6) >= LCD_getWidth())) { // Heading off edge?
-            cursorX = 0;            // Reset x to zero
-            cursorY += textSize * 8; // Advance y one line
-        }
-        LCD_drawChar(cursorX, cursorY, c, textColor, textBgColor, textSize);
-        cursorX += textSize * 6;
-    }
+	if (c == '\n')
+	{
+		cursorY += textSize * 8;
+		cursorX = 0;
+	}
+	else if (c == '\r')
+	{
+		cursorX = 0;
+	}
+	else
+	{
+		if (wrap && ((cursorX + textSize * 6) >= LCD_getWidth()))	// Heading off edge?
+		{
+			cursorX = 0;            // Reset x to zero
+			cursorY += textSize * 8; // Advance y one line
+		}
+		LCD_drawChar(cursorX, cursorY, c, textColor, textBgColor, textSize);
+		cursorX += textSize * 6;
+	}
 }
 
-void LCD_print(u16 x, u16 y, unsigned char *s,u16 tcolor,u16 bcolor,u8 size)
+void LCD_print(u16 x, u16 y, unsigned char *s,u32 tcolor,u32 bcolor,u8 size)
 {
 	cursorX = x;
 	cursorY = y;
@@ -364,33 +372,40 @@ void LCD_print(u16 x, u16 y, unsigned char *s,u16 tcolor,u16 bcolor,u8 size)
 	while (*(s)) LCD_write(*s++);
 }
 
-void LCD_writeString(unsigned char *s) {
-    while (*(s)) LCD_write(*s++);
+void LCD_writeString(unsigned char *s)
+{
+	while (*(s)) LCD_write(*s++);
 }
 
-void LCD_setCursor(u16 x, u16 y) {
-    cursorX = x;
-    cursorY = y;
+void LCD_setCursor(u16 x, u16 y)
+{
+	cursorX = x;
+	cursorY = y;
 }
 
-void LCD_setTextSize(u8 size) {
-    textSize = size;
+void LCD_setTextSize(u8 size)
+{
+	textSize = size;
 }
 
-void LCD_setTextColor(u16 color) {
-    textColor = color;
+void LCD_setTextColor(u16 color)
+{
+	textColor = color;
 }
 
-void LCD_setTextBgColor(u16 color) {
-    textBgColor = color;
+void LCD_setTextBgColor(u16 color)
+{
+	textBgColor = color;
 }
 
-u16 LCD_getCursorX() {
-    return cursorX;
+u16 LCD_getCursorX()
+{
+	return cursorX;
 }
 
-u16 LCD_getCursorY() {
-    return cursorY;
+u16 LCD_getCursorY()
+{
+	return cursorY;
 }
 
 void TEST_fillPrimitives(u16 step)
@@ -406,25 +421,28 @@ void TEST_fillPrimitives(u16 step)
     w = LCD_getWidth();
     h = LCD_getHeight();
 
-    for (x = 0; x < w; x += step) {
-        LCD_drawFastVLine(x, 0, h, DGRAY);
-    }
+    for (x = 0; x < w; x += step)
+	{
+		LCD_drawFastVLine(x, 0, h, DGRAY);
+	}
 
-    for (y = 0; y < h; y += step) {
-        LCD_drawFastHLine(0, y, w, DGRAY);
-    }
+	for (y = 0; y < h; y += step)
+	{
+		LCD_drawFastHLine(0, y, w, DGRAY);
+	}
 
-    for (x = 0; x < w; x += step) {
-        for (y = 0; y < h; y += step) {
-            LCD_drawRect(x, y, halfStep, halfStep, DGREEN);
-            LCD_fillRect(x + halfStep, y + halfStep, halfStep, halfStep, GREENYELLOW);
-            LCD_drawCircle(x + quartStep, y + quartStep, halfQuartStep, GREENYELLOW);
-            LCD_fillCircle(x + halfStep + quartStep, y + halfStep + quartStep, halfQuartStep, DGREEN);
-            LCD_putPixel(x + quartStep, y + quartStep, YELLOW);
-
-            LCD_drawLine(x + halfStep, y + halfStep, x + step, y + step, WHITE);
-        }
-    }
+	for (x = 0; x < w; x += step)
+	{
+		for (y = 0; y < h; y += step)
+		{
+			LCD_drawRect(x, y, halfStep, halfStep, DGREEN);
+			LCD_fillRect(x + halfStep, y + halfStep, halfStep, halfStep, GREENYELLOW);
+			LCD_drawCircle(x + quartStep, y + quartStep, halfQuartStep, GREENYELLOW);
+			LCD_fillCircle(x + halfStep + quartStep, y + halfStep + quartStep, halfQuartStep, DGREEN);
+			LCD_putPixel(x + quartStep, y + quartStep, YELLOW);
+			LCD_drawLine(x + halfStep, y + halfStep, x + step, y + step, WHITE);
+		}
+	}
 }
 
 void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf)
@@ -433,38 +451,39 @@ void LCD_readPixels(u16 x1, u16 y1, u16 x2, u16 y2, u16 *buf)
 	u32 i,count;
 	count	= (u32) ((x2 - x1 + 1) * (y2 - y1 + 1));
 
-    LCD_setAddressWindowToRead(x1, y1, x2, y2);
+	LCD_setAddressWindowToRead(x1, y1, x2, y2);
+	dmaWait();
+	Lcd_CS_Reset();
+	LCD_DC_SET;
 
-    Lcd_CS_Reset();
-    LCD_DC_SET;
+	dmaWait();
+	dmaReceiveDataCont8(&red);
 
-    dmaReceiveDataCont8(&red);
-
-    for (i = 0; i < count; ++i) {
-        dmaReceiveDataCont8(&red);
-        dmaReceiveDataCont8(&green);
-        dmaReceiveDataCont8(&blue);
-
-        buf[i] = (u16) ILI9341_COLOR(red, green, blue);
-    }
-    LCD_CS_SET;
+	for (i = 0; i < count; ++i)
+	{
+		dmaReceiveDataCont8(&red);
+		dmaWait();
+		dmaReceiveDataCont8(&green);
+		dmaWait();
+		dmaReceiveDataCont8(&blue);
+		buf[i] = (u16) ILI9341_COLOR(red, green, blue);
+	}
+	dmaWait();
+	LCD_CS_SET;
 }
 
-
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 
-void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color)
+void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u32 color)
 {
 	u8 r,g,b;
 	u32 count,i,ts;
 	
 	if (x1>screen_width)
 		x1=screen_width;
-		//w=screen_width;
 	if (y1>screen_height)
 		y1=screen_height;
-		//h=screen_width;
 	
 	if (x1+w>screen_width)
 		w=screen_width-x1;
@@ -477,6 +496,10 @@ void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color)
 	r=(u8) ((color&0xf800)>>8);	//red
 	g=(u8) ((color&0x7e0)>>3);
 	b=(u8) ((color&0x1f)<<3);
+	
+	//r=(u8) color>>16;
+	//g=(u8) (color>>8)&0xff;
+	//b=(u8) color&0xff;
 
 	count=count*3;
 
@@ -496,17 +519,15 @@ void LCD_fillRect(u16 x1, u16 y1, u16 w, u16 h, u16 color)
 		dmaSendData8(dma8Buffer, ts);
 		count -= ts;
 	}
-
-	//LCD_setSpi16();
-	//dmaFill16(color, count);
-	//LCD_setSpi8();
 }
 
-void LCD_fillScreen(u16 color) {
+void LCD_fillScreen(u16 color)
+{
     LCD_fillRect(0, 0, LCD_getWidth(), LCD_getHeight(), color);
 }
 
-void LCD_drawFastHLine(u16 x0, u16 y0, u16 w, u16 color) {
+void LCD_drawFastHLine(u16 x0, u16 y0, u16 w, u32 color)
+{
     if (w == 1) {
         LCD_putPixel(x0, y0, color);
         return;
@@ -514,19 +535,21 @@ void LCD_drawFastHLine(u16 x0, u16 y0, u16 w, u16 color) {
     LCD_fillRect(x0, y0, w, 1, color);
 }
 
-void LCD_putPixel(u16 x, u16 y, u16 color) {
+void LCD_putPixel(u16 x, u16 y, u32 color)
+{
     LCD_setAddressWindowToWrite(x, y, x, y);
     LCD_setSpi16();
     dmaFill16(color, 1);
     LCD_setSpi8();
 }
 
-void LCD_putPixelCont(u16 x, u16 y, u16 color) {
+void LCD_putPixelCont(u16 x, u16 y, u32 color)
+{
     LCD_setAddressWindowToWrite(x, y, x, y);
     dmaFill16(color, 1);
 }
 
-void LCD_drawFastVLine(u16 x0, u16 y0, u16 h, u16 color)	
+void LCD_drawFastVLine(u16 x0, u16 y0, u16 h, u32 color)	
 {
     if (h == 1) {
         LCD_putPixel(x0, y0, color);
@@ -627,12 +650,13 @@ void LCD_fillCircleHelper(u16 x0, u16 y0, u16 r, u8 cornername, s16 delta, u16 c
     }
 }
 
-void LCD_fillCircle(u16 x0, u16 y0, u16 r, u16 color) {
+void LCD_fillCircle(u16 x0, u16 y0, u16 r, u16 color)
+{
     LCD_drawFastVLine(x0, y0 - r, (u16) (2 * r + 1), color);
     LCD_fillCircleHelper(x0, y0, r, 3, 0, color);
 }
 
-void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color)
+void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u32 color)
 {
 	s16 dx,dy,Dx,Dy,steep,err,yStep;	
 	Dx = (s16) abs(x1 - x0);
@@ -691,20 +715,24 @@ void LCD_drawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color)
 	}
 }
 
-void LCD_drawRect(u16 x, u16 y, u16 w, u16 h, u16 color) {
-    if (w == 0 || h == 0) return;
-    if (w == 1) {
-        LCD_drawFastVLine(x, y, h, color);
-        return;
-    }
-    if (h == 1) {
-        LCD_drawFastHLine(x, y, w, color);
-        return;
-    }
-    LCD_drawFastHLine(x, y, w, color);
-    LCD_drawFastHLine(x, (u16) (y + h - 1), w, color);
-    LCD_drawFastVLine(x, y, h, color);
-    LCD_drawFastVLine((u16) (x + w - 1), y, h, color);
+void LCD_drawRect(u16 x, u16 y, u16 w, u16 h, u32 color)
+{
+	if (w == 0 || h == 0) return;
+	if (w == 1)
+	{
+		LCD_drawFastVLine(x, y, h, color);
+		return;
+	}
+
+	if (h == 1)
+	{
+		LCD_drawFastHLine(x, y, w, color);
+		return;
+	}
+	LCD_drawFastHLine(x, y, w, color);
+	LCD_drawFastHLine(x, (u16) (y + h - 1), w, color);
+	LCD_drawFastVLine(x, y, h, color);
+	LCD_drawFastVLine((u16) (x + w - 1), y, h, color);
 }
 
 void LCD_setVerticalScrolling(u16 startY, u16 endY)
@@ -713,7 +741,7 @@ void LCD_setVerticalScrolling(u16 startY, u16 endY)
 	
 	d[0]=startY;
 
-	d[1]=(u16) (LCD_PIXEL_HEIGHT_9488 - startY - endY);
+	d[1]=(u16) (LCD_PIXEL_HEIGHT - startY - endY);
 	d[2]=endY;
 	 
 	 dmaSendCmd(LCD_VSCRDEF);
@@ -722,7 +750,8 @@ void LCD_setVerticalScrolling(u16 startY, u16 endY)
     LCD_setSpi8();
 }
 
-void LCD_scroll(u16 v) {
+void LCD_scroll(u16 v)
+{
     dmaSendCmd(LCD_VSCRSADD);
     LCD_setSpi16();
     dmaSendData16(&v, 1);
@@ -733,10 +762,7 @@ void Lcd_CS_Reset(void)
 {
 	u8 i;
 	GPIO_ResetBits(GPIOB, LCD_CS_PIN);
-	for (i=0;i<10;i++)
-	{
-		__NOP;
-	}
+	for (i=0;i<10;i++);
 }
 
 //disegna l'orario
