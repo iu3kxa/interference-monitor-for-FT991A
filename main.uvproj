@@ -413,11 +413,6 @@
               <FilePath>.\main.c</FilePath>
             </File>
             <File>
-              <FileName>artcc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\artcc.c</FilePath>
-            </File>
-            <File>
               <FileName>dma.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\dma.c</FilePath>
@@ -537,6 +532,11 @@
               <FileType>1</FileType>
               <FilePath>.\system_stm32f10x.c</FilePath>
             </File>
+            <File>
+              <FileName>atrcc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\atrcc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -546,11 +546,6 @@
               <FileName>main.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\main.h</FilePath>
-            </File>
-            <File>
-              <FileName>artcc.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\artcc.h</FilePath>
             </File>
             <File>
               <FileName>dma.h</FileName>
@@ -676,6 +671,16 @@
               <FileName>system_stm32f10x.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\system_stm32f10x.h</FilePath>
+            </File>
+            <File>
+              <FileName>rtx.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\rtx.h</FilePath>
+            </File>
+            <File>
+              <FileName>atrcc.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\atrcc.h</FilePath>
             </File>
           </Files>
         </Group>

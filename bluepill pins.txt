@@ -1,0 +1,36 @@
+I2C1: (24lc64, si5351, mcp23017, modified sa818-v)
+PB6 SCL (rimappato su pb8 non va)
+PB7 SDA
+
+USB: (unused, potential usb/serial)
+PA11
+PA12
+
+USART1:	(to pc, isolate via adum1201)
+PA9  TX
+PA10 RX
+
+USART2:	(to rtx ft991a serial port, isolated via adum1201)
+PA0 cts	//unused
+PA1 RTS	//unused
+PA2 TX
+PA3 RX
+
+USART3: (to bt/serial module hc-05)
+PB10 TX
+PB11 RX
+
+SPI2: (w5500, ili9488, xpt2046)
+PB12 NSS
+PB13 CLK
+PB14 MISO
+PB15 MOSI
+
+I/O: (various)
+PB0 interrupt LAN
+PB5 ili9488 CS
+PA8 ili9488 DC
+PA7 ili9488 LED
+PA6 xpt2046 CS
+PA5 pheriperial reset
+

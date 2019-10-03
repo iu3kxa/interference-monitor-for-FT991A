@@ -10,7 +10,7 @@
 #include "rtc.h"
 #include "touch.h"
 #include "lcd_core.h"
-#include "artcc.h"
+#include "atrcc.h"
 #include "i2c.h"
 
 //variabili

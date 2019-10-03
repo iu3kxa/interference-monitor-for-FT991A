@@ -6,7 +6,8 @@
 #define TMR_INTERVAL_TOUCH	500						//50millisecondi
 #define TMR_INTERVAL_LED	10							//1millisecondi
 
-enum _menu_evt {
+enum _menu_evt
+{
 	MAIN_OPEN,MAIN_RUN,
 	MENU_OPEN,MENU_RUN,
 	CLOCK_OPEN,CLOCK_RUN,
@@ -30,7 +31,7 @@ enum _menu_evt {
 #include "i2c.h"
 #include "rtc.h"
 #include "rtx.h"
-#include "artcc.h"					//air traffic route control center (A.C.C. in italia). 
+#include "atrcc.h"					//air traffic route control center (A.C.C. in italia). 
 #include "usart.h"
 #include "eth_w5500.h"
 #include "eth_socket.h"
@@ -46,7 +47,7 @@ extern struct Time_s s_TimeStructVar;
 extern struct coord pos;
 extern unsigned char i2cbuf[I2C_BUFSIZE];
 extern unsigned char buf[16];
-extern struct _artcc_frequencies artcc[];
+extern struct _atrcc_frequencies atrcc[];
 extern struct _rtx_status rtx;
 extern struct _usart_data ser[3];
 enum _menu_evt menu_evt;
@@ -99,7 +100,7 @@ int main(void)
 	
 	//frequenze
 	LCD_setCursor(0,riga+=9);
-	error=artcc_init();
+	error=atrcc_init();
 	LCD_setCursor(0,riga+=9);
 	itoa(error, buf, 10);
 	LCD_writeString(buf);
@@ -166,10 +167,10 @@ int main(void)
 		switch(menu_evt)
 		{
 			case MAIN_OPEN:					//main page with frequencies, specturm and interferences
-				artcc_main_open();
+				atrcc_main_open();
 				menu_evt=MAIN_RUN;
 			case MAIN_RUN:
-				artcc_main_run();
+				atrcc_main_run();
 				break;
 			
 			case MENU_OPEN:					//menu' page
@@ -231,7 +232,7 @@ int main(void)
 			case ERASE_NVRAM_OPEN:		//clear eeprom
 				nvram_reset();
 				eeprom_check();					//reinitialize eeprom 24c64 after full erase
-				artcc_init();
+				atrcc_init();
 				menu_evt=ERASE_NVRAM_RUN;
 			case ERASE_NVRAM_RUN:
 				menu_back();
@@ -505,7 +506,7 @@ void blink(u8 ms)
 }
 
 
-//convert i value to a string copied to buf using radix value of radix
+//convert value to a string copied to buf using radix value of radix
 unsigned long itoa(int value, unsigned char *sp, int radix)
 {
     unsigned long len;
@@ -514,7 +515,8 @@ unsigned long itoa(int value, unsigned char *sp, int radix)
 
     v = sign ? -value : value;
 
-    while (v || tp == tmp) {
+    while (v || tp == tmp)
+	 {
         i = v % radix;
         v /= radix;
         *tp++ = i < 10 ? (char) (i + '0') : (char) (i + 'a' - 10);
@@ -523,7 +525,8 @@ unsigned long itoa(int value, unsigned char *sp, int radix)
 
     len = tp - tmp;
 
-    if (sign) {
+    if (sign)
+	 {
         *sp++ = '-';
         len++;
     }

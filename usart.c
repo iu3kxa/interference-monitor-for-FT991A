@@ -5,7 +5,7 @@
 #include <string.h>
 #include "usart.h"
 #include "lcd_core.h"
-#include "artcc.h"
+#include "atrcc.h"
 #include "rtx.h"
 #include "main.h"
 #include "stm32f10x_gpio.h"
@@ -245,7 +245,7 @@ void usart1_process_data(void)
 	}
 	
 	ser[SERIAL1].evt=10;								//attivita' lato pc
-	lcd_pcDebug(ser[SERIAL1].rx_buf,ser[SERIAL1].pos);
+	//lcd_pcDebug(ser[SERIAL1].rx_buf,ser[SERIAL1].pos);
 	
 	//AT; sconosciuto
 	if(ser[SERIAL1].rx_buf[0]=='A' && ser[SERIAL1].rx_buf[1]=='T')
@@ -569,108 +569,111 @@ void usart2_process_data()
 	//lcd_rtxDebug(ser[SERIAL2].rx_buf, ser[SERIAL2].pos<20 ? ser[SERIAL2].pos : 20);
 
 	
-	//li reinvia sulla seriale 1 verso pc col protocollo FT950 
-	if(ser[SERIAL2].rx_buf[0]=='R' && ser[SERIAL2].rx_buf[1]=='A')
-	{
-		memcpy(ser[SERIAL1].tx_buf, & "RA00;",5);
-		for(i=0;i<5;i++)
-		{
-			USART1->DR=ser[SERIAL1].tx_buf[i];
-			while((USART1->SR & USART_SR_TXE) == 0);
-		}
-	}
 	
-	//IF: informazioni
-	if(ser[SERIAL2].rx_buf[0]=='I' && ser[SERIAL2].rx_buf[1]=='F')
+	//se era presente una trasmissione recente su usart1 li reinvia sulla seriale 1 verso pc col protocollo FT950
+	if(ser[SERIAL1].evt)
 	{
-		pos=0;
-		ser[SERIAL1].tx_buf[0]=ser[SERIAL2].rx_buf[0];
-		ser[SERIAL1].tx_buf[1]=ser[SERIAL2].rx_buf[1];
-		ser[SERIAL1].tx_buf[2]=ser[SERIAL2].rx_buf[2];	//P1:3 memoria
-		ser[SERIAL1].tx_buf[3]=ser[SERIAL2].rx_buf[3];
-		ser[SERIAL1].tx_buf[4]=ser[SERIAL2].rx_buf[4];
-		//salta la cifra delle centinaia di mhz
-		ser[SERIAL1].tx_buf[5]=ser[SERIAL2].rx_buf[6];	//P2:8 frequenza formato ft950
-		ser[SERIAL1].tx_buf[6]=ser[SERIAL2].rx_buf[7];
-		ser[SERIAL1].tx_buf[7]=ser[SERIAL2].rx_buf[8];
-		ser[SERIAL1].tx_buf[8]=ser[SERIAL2].rx_buf[9];
-		ser[SERIAL1].tx_buf[9]=ser[SERIAL2].rx_buf[10];
-		ser[SERIAL1].tx_buf[10]=ser[SERIAL2].rx_buf[11];
-		ser[SERIAL1].tx_buf[11]=ser[SERIAL2].rx_buf[12];
-		ser[SERIAL1].tx_buf[12]=ser[SERIAL2].rx_buf[13];
-		ser[SERIAL1].tx_buf[13]=ser[SERIAL2].rx_buf[14];//P3:5 clari offset
-		ser[SERIAL1].tx_buf[14]=ser[SERIAL2].rx_buf[15];
-		ser[SERIAL1].tx_buf[15]=ser[SERIAL2].rx_buf[16];
-		ser[SERIAL1].tx_buf[16]=ser[SERIAL2].rx_buf[17];
-		ser[SERIAL1].tx_buf[17]=ser[SERIAL2].rx_buf[18];
-		ser[SERIAL1].tx_buf[18]=ser[SERIAL2].rx_buf[19];//P4:1 rx clari on/off
-		ser[SERIAL1].tx_buf[19]=ser[SERIAL2].rx_buf[20];//P5:1 tx clari on/off
-		ser[SERIAL1].tx_buf[20]=ser[SERIAL2].rx_buf[21];//P6:1 modo
-		ser[SERIAL1].tx_buf[21]=ser[SERIAL2].rx_buf[22];//P7:1 vfo/mem
-		ser[SERIAL1].tx_buf[22]=ser[SERIAL2].rx_buf[23];//P8:1 ctcff
-		ser[SERIAL1].tx_buf[23]=ser[SERIAL2].rx_buf[24];//P9:2 tone
-		ser[SERIAL1].tx_buf[24]=ser[SERIAL2].rx_buf[25];
-		ser[SERIAL1].tx_buf[25]=ser[SERIAL2].rx_buf[26];//P10:1 che cacchio e'? simplex/plus/minu shift
-		ser[SERIAL1].tx_buf[26]=';';	
+		if(ser[SERIAL2].rx_buf[0]=='R' && ser[SERIAL2].rx_buf[1]=='A')
+		{
+			memcpy(ser[SERIAL1].tx_buf, & "RA00;",5);
+			for(i=0;i<5;i++)
+			{
+				USART1->DR=ser[SERIAL1].tx_buf[i];
+				while((USART1->SR & USART_SR_TXE) == 0);
+			}
+		}
 		
-		for(i=0;i<27;i++)
+		//IF: informazioni
+		if(ser[SERIAL2].rx_buf[0]=='I' && ser[SERIAL2].rx_buf[1]=='F')
 		{
-			USART1->DR=ser[SERIAL1].tx_buf[i];
-			while((USART1->SR & USART_SR_TXE) == 0);
-		}
-	}
-	else if(ser[SERIAL2].rx_buf[0]=='F' && ser[SERIAL2].rx_buf[1]=='A')
-	{
-		ser[SERIAL1].tx_buf[0]='F';
-		ser[SERIAL1].tx_buf[1]='A';
-		ser[SERIAL1].tx_buf[2]=0X30+((rtx.vfo_A%100000000)/10000000);	//P2:8 frequenza formato ft950
-		ser[SERIAL1].tx_buf[3]=0X30+((rtx.vfo_A%10000000) /1000000);
-		ser[SERIAL1].tx_buf[4]=0X30+((rtx.vfo_A%1000000)  /100000);
-		ser[SERIAL1].tx_buf[5]=0X30+((rtx.vfo_A%100000)   /10000);
-		ser[SERIAL1].tx_buf[6]=0X30+((rtx.vfo_A%10000)   /1000);
-		ser[SERIAL1].tx_buf[7]=0X30+((rtx.vfo_A%1000)  /100);
-		ser[SERIAL1].tx_buf[8]=0X30+((rtx.vfo_A%100)  /10);
-		ser[SERIAL1].tx_buf[9]=0X30+(rtx.vfo_A%10);
-		ser[SERIAL1].tx_buf[10]=';';
+			pos=0;
+			ser[SERIAL1].tx_buf[0]=ser[SERIAL2].rx_buf[0];
+			ser[SERIAL1].tx_buf[1]=ser[SERIAL2].rx_buf[1];
+			ser[SERIAL1].tx_buf[2]=ser[SERIAL2].rx_buf[2];	//P1:3 memoria
+			ser[SERIAL1].tx_buf[3]=ser[SERIAL2].rx_buf[3];
+			ser[SERIAL1].tx_buf[4]=ser[SERIAL2].rx_buf[4];
+			//salta la cifra delle centinaia di mhz
+			ser[SERIAL1].tx_buf[5]=ser[SERIAL2].rx_buf[6];	//P2:8 frequenza formato ft950
+			ser[SERIAL1].tx_buf[6]=ser[SERIAL2].rx_buf[7];
+			ser[SERIAL1].tx_buf[7]=ser[SERIAL2].rx_buf[8];
+			ser[SERIAL1].tx_buf[8]=ser[SERIAL2].rx_buf[9];
+			ser[SERIAL1].tx_buf[9]=ser[SERIAL2].rx_buf[10];
+			ser[SERIAL1].tx_buf[10]=ser[SERIAL2].rx_buf[11];
+			ser[SERIAL1].tx_buf[11]=ser[SERIAL2].rx_buf[12];
+			ser[SERIAL1].tx_buf[12]=ser[SERIAL2].rx_buf[13];
+			ser[SERIAL1].tx_buf[13]=ser[SERIAL2].rx_buf[14];//P3:5 clari offset
+			ser[SERIAL1].tx_buf[14]=ser[SERIAL2].rx_buf[15];
+			ser[SERIAL1].tx_buf[15]=ser[SERIAL2].rx_buf[16];
+			ser[SERIAL1].tx_buf[16]=ser[SERIAL2].rx_buf[17];
+			ser[SERIAL1].tx_buf[17]=ser[SERIAL2].rx_buf[18];
+			ser[SERIAL1].tx_buf[18]=ser[SERIAL2].rx_buf[19];//P4:1 rx clari on/off
+			ser[SERIAL1].tx_buf[19]=ser[SERIAL2].rx_buf[20];//P5:1 tx clari on/off
+			ser[SERIAL1].tx_buf[20]=ser[SERIAL2].rx_buf[21];//P6:1 modo
+			ser[SERIAL1].tx_buf[21]=ser[SERIAL2].rx_buf[22];//P7:1 vfo/mem
+			ser[SERIAL1].tx_buf[22]=ser[SERIAL2].rx_buf[23];//P8:1 ctcff
+			ser[SERIAL1].tx_buf[23]=ser[SERIAL2].rx_buf[24];//P9:2 tone
+			ser[SERIAL1].tx_buf[24]=ser[SERIAL2].rx_buf[25];
+			ser[SERIAL1].tx_buf[25]=ser[SERIAL2].rx_buf[26];//P10:1 che cacchio e'? simplex/plus/minu shift
+			ser[SERIAL1].tx_buf[26]=';';	
 			
-		//impostafrequenza sull'FT991
-		for(i=0;i<11;i++)
-		{
-			USART1->DR=ser[SERIAL1].tx_buf[i];
-			while((USART1->SR & USART_SR_TXE) == 0);
+			for(i=0;i<27;i++)
+			{
+				USART1->DR=ser[SERIAL1].tx_buf[i];
+				while((USART1->SR & USART_SR_TXE) == 0);
+			}
 		}
-	}
-	else if(ser[SERIAL2].rx_buf[0]=='F' && ser[SERIAL2].rx_buf[1]=='B')
-	{
-		ser[SERIAL1].tx_buf[0]='F';
-		ser[SERIAL1].tx_buf[1]='B';
-		ser[SERIAL1].tx_buf[3]=0X30+((rtx.vfo_B%10000000) /1000000);	//P2:8 frequenza formato ft950
-		ser[SERIAL1].tx_buf[4]=0X30+((rtx.vfo_B%1000000)  /100000);
-		ser[SERIAL1].tx_buf[5]=0X30+((rtx.vfo_B%100000)   /10000);
-		ser[SERIAL1].tx_buf[6]=0X30+((rtx.vfo_B%10000)   /1000);
-		ser[SERIAL1].tx_buf[7]=0X30+((rtx.vfo_B%1000)  /100);
-		ser[SERIAL1].tx_buf[8]=0X30+((rtx.vfo_B%100)  /10);
-		ser[SERIAL1].tx_buf[9]=0X30+(rtx.vfo_B%10);
-		ser[SERIAL1].tx_buf[10]=';';
-			
-		//invia frequenza al pc
-		for(i=0;i<pos;i++)
+		else if(ser[SERIAL2].rx_buf[0]=='F' && ser[SERIAL2].rx_buf[1]=='A')
 		{
-			USART1->DR=ser[SERIAL1].tx_buf[i];
-			while((USART1->SR & USART_SR_TXE) == 0);
+			ser[SERIAL1].tx_buf[0]='F';
+			ser[SERIAL1].tx_buf[1]='A';
+			ser[SERIAL1].tx_buf[2]=0X30+((rtx.vfo_A%100000000)/10000000);	//P2:8 frequenza formato ft950
+			ser[SERIAL1].tx_buf[3]=0X30+((rtx.vfo_A%10000000) /1000000);
+			ser[SERIAL1].tx_buf[4]=0X30+((rtx.vfo_A%1000000)  /100000);
+			ser[SERIAL1].tx_buf[5]=0X30+((rtx.vfo_A%100000)   /10000);
+			ser[SERIAL1].tx_buf[6]=0X30+((rtx.vfo_A%10000)   /1000);
+			ser[SERIAL1].tx_buf[7]=0X30+((rtx.vfo_A%1000)  /100);
+			ser[SERIAL1].tx_buf[8]=0X30+((rtx.vfo_A%100)  /10);
+			ser[SERIAL1].tx_buf[9]=0X30+(rtx.vfo_A%10);
+			ser[SERIAL1].tx_buf[10]=';';
+				
+			//impostafrequenza sull'FT991
+			for(i=0;i<11;i++)
+			{
+				USART1->DR=ser[SERIAL1].tx_buf[i];
+				while((USART1->SR & USART_SR_TXE) == 0);
+			}
 		}
-	}
-	else	//se nessuno dei filtri copia il pacchetto dell'rtx.
-	{
-		for(i=0;ser[SERIAL2].rx_buf[i] != ';' && i<TX_BUFSIZE;i++)
+		else if(ser[SERIAL2].rx_buf[0]=='F' && ser[SERIAL2].rx_buf[1]=='B')
 		{
-			USART1->DR=ser[SERIAL2].rx_buf[i];
+			ser[SERIAL1].tx_buf[0]='F';
+			ser[SERIAL1].tx_buf[1]='B';
+			ser[SERIAL1].tx_buf[3]=0X30+((rtx.vfo_B%10000000) /1000000);	//P2:8 frequenza formato ft950
+			ser[SERIAL1].tx_buf[4]=0X30+((rtx.vfo_B%1000000)  /100000);
+			ser[SERIAL1].tx_buf[5]=0X30+((rtx.vfo_B%100000)   /10000);
+			ser[SERIAL1].tx_buf[6]=0X30+((rtx.vfo_B%10000)   /1000);
+			ser[SERIAL1].tx_buf[7]=0X30+((rtx.vfo_B%1000)  /100);
+			ser[SERIAL1].tx_buf[8]=0X30+((rtx.vfo_B%100)  /10);
+			ser[SERIAL1].tx_buf[9]=0X30+(rtx.vfo_B%10);
+			ser[SERIAL1].tx_buf[10]=';';
+				
+			//invia frequenza al pc
+			for(i=0;i<pos;i++)
+			{
+				USART1->DR=ser[SERIAL1].tx_buf[i];
+				while((USART1->SR & USART_SR_TXE) == 0);
+			}
+		}
+		else	//se nessuno dei filtri copia il pacchetto dell'rtx.
+		{
+			for(i=0;ser[SERIAL2].rx_buf[i] != ';' && i<TX_BUFSIZE;i++)
+			{
+				USART1->DR=ser[SERIAL2].rx_buf[i];
+				while((USART1->SR & USART_SR_TXE) == 0);		
+			}
+			USART1->DR=ser[SERIAL2].rx_buf[i];				//invia il ';' mancante
 			while((USART1->SR & USART_SR_TXE) == 0);		
 		}
-		USART1->DR=ser[SERIAL2].rx_buf[i];				//invia il ';' mancante
-		while((USART1->SR & USART_SR_TXE) == 0);		
 	}
-		
 	
 	ser[SERIAL2].oldpos=0;
 	ser[SERIAL2].pos=0;	
